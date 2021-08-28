@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 FILE* read_labyrinth_from_file(void) {
     char maze_file_name[100];
@@ -64,6 +65,27 @@ void free_maze(char** maze, int* M) {
     free(maze);
 }
 
+bool found_egress(int* eM, int* eN, int* ex_pos, int* ey_pos) {
+    if ((*ex_pos == 0 || *ex_pos == *eM) && (*ey_pos == 0 || *ex_pos == *eN)) {
+        return 1;
+    }
+    return 0;
+}
+
+char*** search_for_egress(char*** emaze, int* eM, int* eN, int* ex_pos, int* ey_pos) {
+
+    bool egress = found_egress(eM, eN, ex_pos, ey_pos);
+    if (egress) {
+        return emaze;
+    }
+
+    char** maze = *emaze;
+
+    maze[*ex_pos][*ey_pos] = '*';    
+
+    return emaze;
+}
+
 int main(void) {
 
     FILE* maze_file = read_labyrinth_from_file();
@@ -74,7 +96,10 @@ int main(void) {
     char** maze = NULL;
     maze = store_maze_in_matrix(maze_file, &M, &N);
 
-    print_maze(&maze, &M, &N);
+    char*** egress = NULL;
+    egress = search_for_egress(&maze, &M, &N, &init_x, &init_y);
+
+    print_maze(egress, &M, &N);
 
 
     free_maze(maze, &M);
