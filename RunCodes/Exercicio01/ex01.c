@@ -72,6 +72,31 @@ bool found_egress(int* eM, int* eN, int* ex_pos, int* ey_pos) {
     return 0;
 }
 
+int next_step(char*** emaze, int* ex_pos, int* ey_pos) {
+    char** maze = *emaze;
+    int x = *ex_pos;
+    int y = *ey_pos;
+
+    char up = maze[x-1][y];
+    char right = maze[x][y+1];
+    char down = maze[x+1][y];
+    char left = maze[x][y-1];
+
+    if (up == '.') {
+        return 0;
+    } else {
+        if (right == '.') {
+            return 1;
+        } else {
+            if (down == '.') {
+                return 2;
+            } else {
+                return 3;
+            }
+        }
+    }
+}
+
 char*** search_for_egress(char*** emaze, int* eM, int* eN, int* ex_pos, int* ey_pos) {
 
     bool egress = found_egress(eM, eN, ex_pos, ey_pos);
@@ -82,6 +107,9 @@ char*** search_for_egress(char*** emaze, int* eM, int* eN, int* ex_pos, int* ey_
     char** maze = *emaze;
 
     maze[*ex_pos][*ey_pos] = '*';    
+
+    int next = next_step(emaze, ex_pos, ey_pos);
+    printf("%d\n", next);
 
     return emaze;
 }
