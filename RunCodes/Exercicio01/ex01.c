@@ -164,9 +164,6 @@ char*** search_for_egress(char*** emaze, int* eM, int* eN, int* ex_pos, int* ey_
         maze[*ex_pos][*ey_pos] = 'x'; 
         next = breadcrumbs_fallback(emaze, ex_pos, ey_pos);
     }
-     
-    // print_maze(emaze, eM, eN);
-    // printf("\n\n");
 
     return search_for_egress(emaze, eM, eN, ex_pos, ey_pos);;
 }
@@ -243,8 +240,6 @@ int main(void) {
     calculate_maze_metrics_after_egress(&maze, &M, &N, &n_visited_paths, &n_paths, &fract_visited);
 
     print_maze(egress, &M, &N);
-
-    // printf("%d\n", n_barriers);
 
     print_formated_results(&n_barriers, &n_paths, &n_visited_paths, &fract_visited);
 
