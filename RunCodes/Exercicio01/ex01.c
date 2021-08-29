@@ -206,16 +206,18 @@ void calculate_maze_metrics_after_egress(char*** emaze, int* eM, int* eN, int* e
     }
     *en_visited_paths = n_visited_paths;
 
-    double fract_visited = ((double) n_visited_paths / (double) *en_paths) * 100;
+    double fract_visited = ((double) n_visited_paths / (double) *en_paths);
+    float rounded = ((int)(fract_visited * 100) / 100.0);
     
-    *efract_visited = fract_visited; 
+    *efract_visited = rounded * 100; 
 }
 
 void print_formated_results(int* en_barriers, int* en_paths,  int* en_visited_paths, double* efract_visited) {
+
     printf("\nVoce escapou de todos! Ninguem conseguiu te segurar!\n");
     printf("Veja abaixo os detalhes da sua fuga:\n");
     printf("----Pessoas te procurando: %d\n", *en_barriers);
-    printf("----Numero total de caminhos validos: %d\n", *en_paths);
+    printf("----Numero total de caminhos validos:   %d\n", *en_paths);
     printf("----Numero total de caminhos visitados: %d\n", *en_visited_paths);
     printf("----Exploracao total do labirinto: %.1lf%%\n", *efract_visited);
 }
