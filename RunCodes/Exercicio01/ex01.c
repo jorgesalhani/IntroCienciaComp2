@@ -66,10 +66,10 @@ void free_maze(char** maze, int* M) {
 }
 
 bool found_egress(int* eM, int* eN, int* ex_pos, int* ey_pos) {
-    if ((*ex_pos == 0 || *ex_pos == *eM) && (*ey_pos == 0 || *ex_pos == *eN)) {
-        return 1;
+    if ((*ex_pos == 0 || *ex_pos == *eM-1) || (*ey_pos == 0 || *ey_pos == *eN-1)) {
+        return true;
     }
-    return 0;
+    return false;
 }
 
 int next_step(char*** emaze, int* ex_pos, int* ey_pos) {
@@ -83,35 +83,141 @@ int next_step(char*** emaze, int* ex_pos, int* ey_pos) {
     char left = maze[x][y-1];
 
     if (up == '.') {
+        *ex_pos -= 1;
         return 0;
     } else {
         if (right == '.') {
-            return 1;
+            *ey_pos += 1;
+            return 0;
         } else {
             if (down == '.') {
-                return 2;
+                *ex_pos += 1;
+                return 0;
             } else {
-                return 3;
+                if (left == '.') {
+                    *ey_pos -= 1;
+                    return 0;
+                }
             }
         }
     }
+
+    return 1;
+}
+
+bool found_endpoint(int *enext) {
+    if (*enext == 1) {
+        return true;
+    }
+    return false;
+}
+
+int breadcrumbs_fallback(char*** emaze, int* ex_pos, int* ey_pos) {
+    char** maze = *emaze;
+    int x = *ex_pos;
+    int y = *ey_pos;
+
+    char up = maze[x-1][y];
+    char right = maze[x][y+1];
+    char down = maze[x+1][y];
+    char left = maze[x][y-1];
+
+    if (up == '*') {
+        *ex_pos -= 1;
+        return 0;
+    } else {
+        if (right == '*') {
+            *ey_pos += 1;
+            return 0;
+        } else {
+            if (down == '*') {
+                *ex_pos += 1;
+                return 0;
+            } else {
+                if (left == '*') {
+                    *ey_pos -= 1;
+                    return 0;
+                }
+            }
+        }
+    }
+
+    return 1;
 }
 
 char*** search_for_egress(char*** emaze, int* eM, int* eN, int* ex_pos, int* ey_pos) {
 
+    char** maze = *emaze;
     bool egress = found_egress(eM, eN, ex_pos, ey_pos);
     if (egress) {
+        maze[*ex_pos][*ey_pos] = '*';  
         return emaze;
     }
 
-    char** maze = *emaze;
-
-    maze[*ex_pos][*ey_pos] = '*';    
+    maze[*ex_pos][*ey_pos] = '*';   
+    // printf("%d %d\n", *ex_pos, *ey_pos);
 
     int next = next_step(emaze, ex_pos, ey_pos);
-    printf("%d\n", next);
+    bool endpoint = found_endpoint(&next);
 
-    return emaze;
+    if (endpoint) {
+        maze[*ex_pos][*ey_pos] = 'x'; 
+        next = breadcrumbs_fallback(emaze, ex_pos, ey_pos);
+    }
+     
+    // print_maze(emaze, eM, eN);
+    // printf("\n\n");
+
+    return search_for_egress(emaze, eM, eN, ex_pos, ey_pos);;
+}
+
+void calculate_maze_metrics(char*** emaze, int* eM, int* eN, int* en_barriers, int* en_paths) {
+    char** maze = *emaze;
+    int n_paths = 0;
+    int n_barriers = 0;
+    for (int i = 0; i < *eM; i++) {
+        for (int j = 0; j < *eN; j++) {
+            if (maze[i][j] == '.') {
+                n_paths++;
+            } else {
+                if (maze[i][j] == '#') {
+                    n_barriers++;
+                }
+            }
+        }
+    }
+
+    *en_barriers = n_barriers;
+    *en_paths = n_paths;
+
+}
+
+void calculate_maze_metrics_after_egress(char*** emaze, int* eM, int* eN, int* en_visited_paths, int* en_paths, double* efract_visited) {
+    char** maze = *emaze;
+    int n_visited_paths = 0;
+
+    for (int i = 0; i < *eM; i++) {
+        for (int j = 0; j < *eN; j++) {
+            if (maze[i][j] == 'x') maze[i][j] = '*';
+            if (maze[i][j] == '*') {
+                n_visited_paths++;
+            }
+        }
+    }
+    *en_visited_paths = n_visited_paths;
+
+    double fract_visited = ((double) n_visited_paths / (double) *en_paths) * 100;
+    
+    *efract_visited = fract_visited; 
+}
+
+void print_formated_results(int* en_barriers, int* en_paths,  int* en_visited_paths, double* efract_visited) {
+    printf("\nVoce escapou de todos! Ninguem conseguiu te segurar!\n");
+    printf("Veja abaixo os detalhes da sua fuga:\n");
+    printf("----Pessoas te procurando: %d\n", *en_barriers);
+    printf("----Numero total de caminhos validos: %d\n", *en_paths);
+    printf("----Numero total de caminhos visitados: %d\n", *en_visited_paths);
+    printf("----Exploracao total do labirinto: %.1lf%%\n", *efract_visited);
 }
 
 int main(void) {
@@ -124,10 +230,21 @@ int main(void) {
     char** maze = NULL;
     maze = store_maze_in_matrix(maze_file, &M, &N);
 
+    int n_barriers, n_paths;
+    calculate_maze_metrics(&maze, &M, &N, &n_barriers, &n_paths);
+
     char*** egress = NULL;
-    egress = search_for_egress(&maze, &M, &N, &init_x, &init_y);
+    egress = search_for_egress(&maze, &M, &N, &init_x, &init_y); 
+
+    int n_visited_paths;
+    double fract_visited;
+    calculate_maze_metrics_after_egress(&maze, &M, &N, &n_visited_paths, &n_paths, &fract_visited);
 
     print_maze(egress, &M, &N);
+
+    // printf("%d\n", n_barriers);
+
+    print_formated_results(&n_barriers, &n_paths, &n_visited_paths, &fract_visited);
 
 
     free_maze(maze, &M);
