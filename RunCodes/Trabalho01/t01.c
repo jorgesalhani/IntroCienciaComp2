@@ -22,8 +22,9 @@ FILE* read_mine_from_file() {
     return mine_file;    
 }
 
-char*** store_mine_map_from_file(FILE* mine_file, int* M, int* N) {
-    char** mine_map = malloc(sizeof(char**));
+char** store_mine_map_from_file(FILE* mine_file, int* M, int* N) {
+    char** mine_map = NULL;
+    mine_map = malloc(sizeof(char*));
     
     char mine_item; 
     mine_item = fgetc(mine_file);
@@ -52,19 +53,24 @@ char*** store_mine_map_from_file(FILE* mine_file, int* M, int* N) {
     *M = i;
     *N = j_global; 
 
-    for (int x = 0; x < *M; ++x) {
-        free(mine_map[x]);
-    }
-    free(mine_map);
+    return mine_map;
 }
 
-void free_mine_map(char*** pointer_to_mine_map, int* M) {
-    char** mine_map = *pointer_to_mine_map;
+void free_mine_map(char** mine_map, int* M) {
     for (int i = 0; i < *M; i++) {
         free(mine_map[i]);
     }
     free(mine_map);
-    free(pointer_to_mine_map);
+}
+
+void print_mine_map(char*** pointer_to_mine_map, int* M, int* N) {
+    char** mine_map = *pointer_to_mine_map;
+    for (int i = 0; i < *M; ++i) {
+        for (int j = 0; j < *N; ++j) {
+            printf("%c", mine_map[i][j]);
+        }
+        printf("\n");
+    }
 }
 
 int main(void) {
@@ -73,15 +79,15 @@ int main(void) {
 
     FILE* mine_file = read_mine_from_file();
 
-    char*** pointer_to_mine_map = NULL;
+    char** mine_map = NULL;
     int M, N;
     M = 0;
     N = 0;
 
-    pointer_to_mine_map = store_mine_map_from_file(mine_file, &M, &N);
+    mine_map = store_mine_map_from_file(mine_file, &M, &N);
+    print_mine_map(&mine_map, &M, &N);
 
-    printf("%d %d\n", M, N);
-    // free_mine_map(pointer_to_mine_map, &M);
+    free_mine_map(mine_map, &M);
     fclose(mine_file);
     return 0;
 }
