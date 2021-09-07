@@ -31,6 +31,13 @@ long int algoritmo2(int N) {
 
                                 // Considerando a == c == o == r = C
                                 // f(n) = (-9C) + (8C)*N
+
+                                // Considerando:
+                                // a = operacoes aritmeticas (antes chamado de 'o') e atribuicoes (antes chamado de 'a')
+                                // b = comparacoes e operacoes logicas (antes chamado de 'c')
+                                
+                                // Entao: 
+                                // f(n) = (-11a + b) + N*(7a + b)
 }
 
 int main (int argv, char* argc[]) {
