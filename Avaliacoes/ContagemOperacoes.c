@@ -37,7 +37,7 @@ long int algoritmo2(int N) {
                                 // b = comparacoes e operacoes logicas (antes chamado de 'c')
                                 
                                 // Entao: 
-                                // f(n) = (-11a + b) + N*(7a + b)
+                                // f(n) = (-11a + b) + N(7a + b)
 }
 
 int main (int argv, char* argc[]) {

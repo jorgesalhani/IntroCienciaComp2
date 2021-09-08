@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 int get_selected_option(void) {
     int selected_option;
@@ -73,38 +74,178 @@ void print_mine_map(char*** pointer_to_mine_map, int* M, int* N) {
     }
 }
 
-void fill_mine_map_with_hints(char*** pointer_to_mine_map, int* M, int* N, int* cursor_M, int* cursor_N) {
+bool position_is_available(char*** pointer_to_mine_map, int pos_i, int pos_j) {
     char** mine_map = *pointer_to_mine_map;
-    int cursor_x = *cursor_M;
-    int cursor_y = *cursor_N;
+    if (mine_map[pos_i][pos_j] == '*') {
+        return false;
+    }
+    return true;
+}
 
-    if ((cursor_x * cursor_y) == (*M)*(*N)) {
+bool position_already_counted(char*** pointer_to_mine_map, int i, int j) {
+    char** mine_map = *pointer_to_mine_map;
+    if (mine_map[i][j] == '.') {
+        return false;
+    }
+    return true;
+}
+
+void top_left_corner_edge_limits(int* edge_limits) {
+        edge_limits[0] = 0;
+        edge_limits[1] = 2;
+        edge_limits[2] = 0;
+        edge_limits[3] = 2;
+}
+
+void top_right_corner_edge_limits(int* edge_limits){
+    edge_limits[0] = 0;
+    edge_limits[1] = 2;
+    edge_limits[2] = -1;
+    edge_limits[3] = 1;
+}
+
+void top_edge_limits(int* edge_limits) {
+    edge_limits[0] = 0;
+    edge_limits[1] = 2;
+    edge_limits[2] = -1;
+    edge_limits[3] = 2;
+}
+
+void bottom_right_corner_edge_limits(int* edge_limits) {
+    edge_limits[0] = -1;
+    edge_limits[1] = 1;
+    edge_limits[2] = -1;
+    edge_limits[3] = 1;
+}
+
+void bottom_left_corner_edge_limits(int* edge_limits) {
+    edge_limits[0] = -1;
+    edge_limits[1] = 1;
+    edge_limits[2] = 0;
+    edge_limits[3] = 2;
+}
+
+void bottom_edge_limits(int* edge_limits) {
+    edge_limits[0] = -1;
+    edge_limits[1] = 1;
+    edge_limits[2] = -1;
+    edge_limits[3] = 2;
+}
+
+void left_edge_limits(int* edge_limits) {
+    edge_limits[0] = -1;
+    edge_limits[1] = 2;
+    edge_limits[2] = 0;
+    edge_limits[3] = 2;
+}
+
+void right_edge_limits(int* edge_limits) {
+    edge_limits[0] = -1;
+    edge_limits[1] = 2;
+    edge_limits[2] = -1;
+    edge_limits[3] = 1;
+}
+
+void middle_edge_limits(int* edge_limits) {
+    edge_limits[0] = -1;
+    edge_limits[1] = 2;
+    edge_limits[2] = -1;
+    edge_limits[3] = 2;
+}
+
+void get_edge_limits(char*** pointer_to_mine_map, int* edge_limits, int* pos_i, int* pos_j, int* M, int* N) {
+    int i = *pos_i;
+    int j = *pos_j;
+
+    if (i == 0) {
+        if (j == 0) {
+            top_left_corner_edge_limits(edge_limits);
+            return;
+        }
+
+        if (j == (*N - 1)) {
+            top_right_corner_edge_limits(edge_limits);
+            return;
+        }
+
+        top_edge_limits(edge_limits);
         return;
     }
 
-    // printf("%c", *(**pointer_to_mine_map + count));
-    // printf("%c", **pointer_to_mine_map + count);
-    // printf("%d ", *counter);
-    printf("%d %d\n", cursor_x, cursor_y);
+    if (i == (*M - 1)) {
+        if (j == (*N - 1)) {
+            bottom_right_corner_edge_limits(edge_limits);
+            return;
+        }
 
-    cursor_x++;
-    cursor_y++;
+        if (j == 0) {
+            bottom_left_corner_edge_limits(edge_limits);
+            return;
+        }
 
-    cursor_x = cursor_x%(*M + 1);
-    cursor_y = cursor_y%(*N + 1);
+        bottom_edge_limits(edge_limits);
+        return;
+    }
 
-    *cursor_M = cursor_x;
-    *cursor_N = cursor_y;
-    fill_mine_map_with_hints(pointer_to_mine_map, M, N, cursor_M, cursor_N);
+    if (j == 0) {
+        left_edge_limits(edge_limits);
+        return;
+    }
+
+    if (j == (*N - 1)) {
+        right_edge_limits(edge_limits);
+        return;
+    }
+
+    middle_edge_limits(edge_limits);
+    return;
+}
+
+void add_one_near_mine(char*** pointer_to_mine_map, int* pos_i, int* pos_j, int* M, int* N) {
+    char** mine_map = *pointer_to_mine_map;
+
+    int* edge_limits = NULL;
+    edge_limits = calloc(4, sizeof(int));
+
+    get_edge_limits(pointer_to_mine_map, edge_limits, pos_i, pos_j, M, N);
+
+    int i = *pos_i;
+    int j = *pos_j;
+
+    for (int x = edge_limits[0]; x < edge_limits[1]; x++) {
+        for (int y = edge_limits[2]; y < edge_limits[3]; y++) {
+            if (position_is_available(pointer_to_mine_map, (i + x), (j + y))) {
+                if (position_already_counted(pointer_to_mine_map, (i+x), (j+y))) {
+                    mine_map[i+x][j+y] += 1;
+                } else {
+                    mine_map[i+x][j+y] = 0 + '0';
+                    mine_map[i+x][j+y] += 1;
+                }
+            }
+        }
+    }
+
+    free(edge_limits);
+}
+
+void fill_mine_map_with_hints(char*** pointer_to_mine_map, int* M, int* N) {
+    char** mine_map = *pointer_to_mine_map;
+
+    for (int i = 0; i < (*M); i++) {
+        for (int j = 0; j < (*N); j++) {
+            char mine_item = mine_map[i][j];
+            if (mine_item == '*') {
+                add_one_near_mine(pointer_to_mine_map, &i, &j, M, N);
+            }
+            // mine_map[i][j] = mine_count + '0';
+        }
+    }
 }
 
 void print_mine_map_with_hints(char*** pointer_to_mine_map, int* M, int* N) {
-    int cursor_M = 0;
-    int cursor_N = 0;
+    fill_mine_map_with_hints(pointer_to_mine_map, M, N);
 
-    fill_mine_map_with_hints(pointer_to_mine_map, M, N, &cursor_M, &cursor_N);
-
-    // print_mine_map(pointer_to_mine_map, M, N);
+    print_mine_map(pointer_to_mine_map, M, N);
 }
 
 void option_one(char*** pointer_to_mine_map, int* M, int* N, int* selected_option) {
