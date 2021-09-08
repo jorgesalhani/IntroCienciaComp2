@@ -1,3 +1,9 @@
+/* HEADER
+Autor:      Jorge Augusto Salgado Salhani --- no USP: 8927418 ---
+Disciplina: SCC0201 Introducao a Ciencia da Computacao - 2o sem 2021
+Titulo:     Trabalho 01: Campo Minado
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -237,15 +243,52 @@ void fill_mine_map_with_hints(char*** pointer_to_mine_map, int* M, int* N) {
             if (mine_item == '*') {
                 add_one_near_mine(pointer_to_mine_map, &i, &j, M, N);
             }
-            // mine_map[i][j] = mine_count + '0';
         }
     }
 }
 
 void print_mine_map_with_hints(char*** pointer_to_mine_map, int* M, int* N) {
     fill_mine_map_with_hints(pointer_to_mine_map, M, N);
-
     print_mine_map(pointer_to_mine_map, M, N);
+}
+
+void hide_map(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
+    char** mine_map = *pointer_to_mine_map;
+    for (int i = 0; i < (*M); i++) {
+        for (int j = 0; j < (*N); j++) {
+            if (i == *cursor_x && j == *cursor_y) {
+            } else {
+                mine_map[i][j] = 'X';
+            }
+        }
+    }
+}
+
+void user_flow_after_chosen_position(char*** pointer_to_mine_map, int* M, int* N, int* cursor_x, int* cursor_y) {
+    char** mine_map = *pointer_to_mine_map;
+    int x = *cursor_x;
+    int y = *cursor_y;
+
+    fill_mine_map_with_hints(pointer_to_mine_map, M, N);
+
+    if (mine_map[x][y] == '*') {
+        print_mine_map(pointer_to_mine_map, M, N);
+        return;
+    }
+
+    if (position_already_counted(pointer_to_mine_map, x, y)) {
+        hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+        print_mine_map(pointer_to_mine_map, M, N);
+    }
+}
+
+void user_control(char*** pointer_to_mine_map, int* M, int* N) {
+    int cursor_x;
+    int cursor_y;
+    scanf("%d ", &cursor_x);
+    scanf("%d ", &cursor_y);
+    
+    user_flow_after_chosen_position(pointer_to_mine_map, M, N, &cursor_x, &cursor_y);
 }
 
 void option_one(char*** pointer_to_mine_map, int* M, int* N, int* selected_option) {
@@ -254,6 +297,10 @@ void option_one(char*** pointer_to_mine_map, int* M, int* N, int* selected_optio
 
 void option_two(char*** pointer_to_mine_map, int* M, int* N, int* selected_option) {
     if (*selected_option == 2) print_mine_map_with_hints(pointer_to_mine_map, M, N);
+}
+
+void option_three(char*** pointer_to_mine_map, int* M, int* N, int* selected_option) {
+    if (*selected_option == 3) user_control(pointer_to_mine_map, M, N);
 }
 
 int main(void) {
@@ -271,6 +318,7 @@ int main(void) {
 
     option_one(&mine_map, &M, &N, &selected_option);
     option_two(&mine_map, &M, &N, &selected_option);
+    option_three(&mine_map, &M, &N, &selected_option);
 
     free_mine_map(mine_map, &M);
     fclose(mine_file);
