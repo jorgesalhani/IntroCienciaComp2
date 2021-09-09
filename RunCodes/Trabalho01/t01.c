@@ -264,6 +264,7 @@ void hide_map(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M,
     }
 }
 
+
 void user_flow_after_chosen_position(char*** pointer_to_mine_map, int* M, int* N, int* cursor_x, int* cursor_y) {
     char** mine_map = *pointer_to_mine_map;
     int x = *cursor_x;
@@ -279,6 +280,11 @@ void user_flow_after_chosen_position(char*** pointer_to_mine_map, int* M, int* N
     if (position_already_counted(pointer_to_mine_map, x, y)) {
         hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
         print_mine_map(pointer_to_mine_map, M, N);
+        return;
+    } else {
+        // TODO: add last treatment
+        print_mine_map(pointer_to_mine_map, M, N);
+        return;
     }
 }
 
