@@ -9,6 +9,7 @@ Titulo:     Trabalho 01: Campo Minado
 #include <string.h>
 #include <stdbool.h>
 
+
 int get_selected_option(void) {
     int selected_option;
     scanf("%d ", &selected_option);
@@ -264,6 +265,95 @@ void hide_map(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M,
     }
 }
 
+bool light_near_positions(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
+    char** mine_map = *pointer_to_mine_map;
+
+    int* edge_limits = NULL;
+    edge_limits = calloc(4, sizeof(int));
+    get_edge_limits(pointer_to_mine_map, edge_limits, cursor_x, cursor_y, M, N);
+
+    int i = *cursor_x;
+    int j = *cursor_y;
+
+    bool available_position = false;
+    for (int x = edge_limits[0]; x < edge_limits[1]; x++) {
+        for (int y = edge_limits[2]; y < edge_limits[3]; y++) {
+            if (position_has_no_mines(pointer_to_mine_map, (i + x), (j + y))) {
+                if (!position_already_counted(pointer_to_mine_map, (i+x), (j+y))) {
+                    mine_map[*cursor_x][*cursor_y] = '0';
+                    *cursor_x = i + x;
+                    *cursor_y = j + y;
+                    available_position = true;
+                }
+            }
+        }
+    }
+
+    free(edge_limits);
+    return available_position;
+}
+
+bool breadcrumbs_fallback(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
+    char** mine_map = *pointer_to_mine_map;
+    bool available_position = false;
+    for (int i = 0; i < *M; i++) {
+        for (int j = 0; j < *N; j++) {
+            if (mine_map[i][j] == '0') {
+                // available_position = light_near_positions(pointer_to_mine_map, &i, &j, M, N);
+            }
+            // printf("%d %d: %s  ", i, j, available_position ? "true": "false" );
+            // print_mine
+        }
+    }
+
+    return available_position;
+}
+
+bool light_near_positions_and_fallback(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
+    char** mine_map = *pointer_to_mine_map;
+
+    int* edge_limits = NULL;
+    edge_limits = calloc(4, sizeof(int));
+    get_edge_limits(pointer_to_mine_map, edge_limits, cursor_x, cursor_y, M, N);
+
+    int i = *cursor_x;
+    int j = *cursor_y;
+
+    bool available_position = light_near_positions(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+
+    if (!available_position) {
+        printf("%d %d\n", i, j);
+        breadcrumbs_fallback(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+    }
+
+    free(edge_limits);
+    return available_position;
+}
+
+void partially_hide_map(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
+    char** mine_map = *pointer_to_mine_map;
+
+    int* edge_limits = NULL;
+    edge_limits = calloc(4, sizeof(int));
+    get_edge_limits(pointer_to_mine_map, edge_limits, cursor_x, cursor_y, M, N);
+    print_mine_map(pointer_to_mine_map, M, N);
+    printf("\n\n");
+
+    int i = *cursor_x;
+    int j = *cursor_y;
+
+    
+    bool available_position = light_near_positions_and_fallback(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+
+    free(edge_limits);
+    
+    if (available_position) {
+        return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+    } else {
+        return;
+    }
+}
+
 void user_flow_after_chosen_position(char*** pointer_to_mine_map, int* M, int* N, int* cursor_x, int* cursor_y) {
     char** mine_map = *pointer_to_mine_map;
     int x = *cursor_x;
@@ -281,8 +371,8 @@ void user_flow_after_chosen_position(char*** pointer_to_mine_map, int* M, int* N
         print_mine_map(pointer_to_mine_map, M, N);
         return;
     } else {
-        // partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-        // print_partially_hide_map(pointer_to_mine_map, M, N);
+        partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+        print_mine_map(pointer_to_mine_map, M, N);
         return;
     }
 }
