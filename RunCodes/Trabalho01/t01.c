@@ -295,19 +295,29 @@ bool light_near_positions(char*** pointer_to_mine_map, int* cursor_x, int* curso
 
 bool breadcrumbs_fallback(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
     char** mine_map = *pointer_to_mine_map;
+    int* edge_limits = NULL;
+    edge_limits = calloc(4, sizeof(int));
+    get_edge_limits(pointer_to_mine_map, edge_limits, cursor_x, cursor_y, M, N);
+
+    int i = *cursor_x;
+    int j = *cursor_y;
+
     bool available_position = false;
-    for (int i = 0; i < *M; i++) {
-        for (int j = 0; j < *N; j++) {
-            if (mine_map[i][j] == '0') {
-                // available_position = light_near_positions(pointer_to_mine_map, &i, &j, M, N);
+    for (int x = edge_limits[1] - 1; x >= edge_limits[0]; x--) {
+        for (int y = edge_limits[3] - 1; y >= edge_limits[2]; y--) {
+            if (mine_map[i+x][j+y] == '0') {
+                mine_map[*cursor_x][*cursor_y] = 'X';
+                *cursor_x = i + x;
+                *cursor_y = j + y;
+                available_position = true;
             }
-            // printf("%d %d: %s  ", i, j, available_position ? "true": "false" );
-            // print_mine
         }
     }
 
+    free(edge_limits);
     return available_position;
 }
+
 
 bool light_near_positions_and_fallback(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
     char** mine_map = *pointer_to_mine_map;
@@ -323,7 +333,8 @@ bool light_near_positions_and_fallback(char*** pointer_to_mine_map, int* cursor_
 
     if (!available_position) {
         printf("%d %d\n", i, j);
-        breadcrumbs_fallback(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+        available_position = breadcrumbs_fallback(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+        // check_still_available_position(pointer_to_mine_map, cursor_x, cursor_y, M, N);
     }
 
     free(edge_limits);
