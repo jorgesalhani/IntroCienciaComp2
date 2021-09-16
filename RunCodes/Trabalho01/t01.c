@@ -321,8 +321,6 @@ bool breadcrumbs_fallback(char*** pointer_to_mine_map, int* cursor_x, int* curso
 
 
 bool light_near_positions_and_fallback(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
-    char** mine_map = *pointer_to_mine_map;
-
     int* edge_limits = NULL;
     edge_limits = calloc(4, sizeof(int));
     get_edge_limits(pointer_to_mine_map, edge_limits, cursor_x, cursor_y, M, N);
@@ -409,10 +407,6 @@ void partially_hide_map(char*** pointer_to_mine_map, int* cursor_x, int* cursor_
     // printf("%d %d\n", *cursor_x, *cursor_y);
     // print_mine_map(pointer_to_mine_map, M, N);
     // printf("\n\n");
-
-    int i = *cursor_x;
-    int j = *cursor_y;
-
     
     bool available_position = light_near_positions_and_fallback(pointer_to_mine_map, cursor_x, cursor_y, M, N);
 
@@ -511,7 +505,7 @@ void user_flow_after_chosen_position(char*** pointer_to_mine_map, int* M, int* N
 }
 
 void user_control(char*** pointer_to_mine_map, int* M, int* N) {
-    int cursor_x = 0;
+    int cursor_x = 8;
     int cursor_y = 0;
     scanf("%d ", &cursor_x);
     scanf("%d ", &cursor_y);
