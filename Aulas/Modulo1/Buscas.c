@@ -101,6 +101,14 @@ int busca_binaria(int* v, int ini, int fim, int chave){
     return FAIL;
 }
 
+int busca_sequencial_recursive(int* v, int chave, int N) {
+    
+    // 1. Caso base (criterio de parada)
+    // 2. Passe recursivo
+    
+    // if (v[i] == chave) return i;
+}
+
 int main (int argc, char* argv[]) {
 
     if (argc < 5) {
