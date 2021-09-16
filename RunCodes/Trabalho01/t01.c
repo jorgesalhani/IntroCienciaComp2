@@ -448,35 +448,6 @@ void partially_hide_map(char*** pointer_to_mine_map, int* cursor_x, int* cursor_
         }
         
         return;
-
-        // if (*cursor_y + 2 < *N && (mine_map[*cursor_x][*cursor_y + 2] == 'X' || mine_map[*cursor_x][*cursor_y + 2] == '0')) {
-        //     *cursor_y = *cursor_y + 2;
-        //     return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-        // }
-
-        // if (*cursor_x - 2 >= 0 && (mine_map[*cursor_x - 2][*cursor_y] == 'X' || mine_map[*cursor_x - 2][*cursor_y] == '0')) {
-        //     *cursor_x = *cursor_x - 2;
-        //     return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-        // }
-
-        // if (*cursor_y - 2 < *N && (mine_map[*cursor_x][*cursor_y - 2] == 'X' || mine_map[*cursor_x][*cursor_y - 2] == '0')) {
-        //     *cursor_y = *cursor_y - 2;
-        //     return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-        // } else {
-        //     return;
-        // }
-
-        // if (*cursor_x + 2 < *M && (mine_map[*cursor_x + 2][*cursor_y] == 'X' || mine_map[*cursor_x + 2][*cursor_y] == '0')) {
-        //     *cursor_x = *cursor_x + 2;
-        //     return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-        // } else {
-        //     return;
-        // }
-
-        // *cursor_y = *cursor_y + 2;
-        // if (*cursor_y > *N) return;
-        // return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-        // return;
     }
 }
 
