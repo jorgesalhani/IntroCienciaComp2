@@ -266,77 +266,6 @@ void hide_map(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M,
     }
 }
 
-bool light_near_positions(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
-    char** mine_map = *pointer_to_mine_map;
-
-    int* edge_limits = NULL;
-    edge_limits = calloc(4, sizeof(int));
-    get_edge_limits(pointer_to_mine_map, edge_limits, cursor_x, cursor_y, M, N);
-
-    int i = *cursor_x;
-    int j = *cursor_y;
-
-    bool available_position = false;
-    for (int y = edge_limits[2]; y < edge_limits[3]; y++) {
-        for (int x = edge_limits[0]; x < edge_limits[1]; x++) {
-            if (position_has_no_mines(pointer_to_mine_map, (i + x), (j + y))) {
-                if (!position_already_counted(pointer_to_mine_map, (i+x), (j+y))) {
-                    mine_map[*cursor_x][*cursor_y] = '0';
-                    *cursor_x = i + x;
-                    *cursor_y = j + y;
-                    available_position = true;
-                }
-            }
-        }
-    }
-
-    free(edge_limits);
-    return available_position;
-}
-
-bool breadcrumbs_fallback(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
-    char** mine_map = *pointer_to_mine_map;
-    int* edge_limits = NULL;
-    edge_limits = calloc(4, sizeof(int));
-    get_edge_limits(pointer_to_mine_map, edge_limits, cursor_x, cursor_y, M, N);
-
-    int i = *cursor_x;
-    int j = *cursor_y;
-
-    bool available_position = false;
-    for (int y = edge_limits[3] - 1; y >= edge_limits[2]; y--) {
-        for (int x = edge_limits[1] - 1; x >= edge_limits[0]; x--) {
-            if (mine_map[i+x][j+y] == '0') {
-                mine_map[*cursor_x][*cursor_y] = 'X';
-                *cursor_x = i + x;
-                *cursor_y = j + y;
-                available_position = true;
-            }
-        }
-    }
-
-    free(edge_limits);
-    return available_position;
-}
-
-
-bool light_near_positions_and_fallback(char*** pointer_to_mine_map, int* cursor_x, int* cursor_y, int* M, int* N) {
-    int* edge_limits = NULL;
-    edge_limits = calloc(4, sizeof(int));
-    get_edge_limits(pointer_to_mine_map, edge_limits, cursor_x, cursor_y, M, N);
-
-    bool available_position = light_near_positions(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-
-    if (!available_position) {
-        // printf("%d %d\n", i, j);
-        available_position = breadcrumbs_fallback(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-        // check_still_available_position(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-    }
-
-    free(edge_limits);
-    return available_position;
-}
-
 void fill_known_mine_map(char*** pointer_to_mine_map, int* M, int* N) {
     char** mine_map = *pointer_to_mine_map;
     for (int i = 0; i < *M; i++) {
@@ -407,48 +336,96 @@ void partially_hide_map(char*** pointer_to_mine_map, int* cursor_x, int* cursor_
     // printf("%d %d\n", *cursor_x, *cursor_y);
     // print_mine_map(pointer_to_mine_map, M, N);
     // printf("\n\n");
+
+    if (edge_limits[0] == -1) {
+        if (!position_already_counted(pointer_to_mine_map, *cursor_x - 1, *cursor_y)) {
+            mine_map[*cursor_x - 1][*cursor_y] = 0 + '0';
+            *cursor_x = *cursor_x - 1;
+            partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+            *cursor_x = *cursor_x + 1;
+        }
+
+        if (edge_limits[2] == -1) {
+            if (!position_already_counted(pointer_to_mine_map, *cursor_x - 1, *cursor_y - 1)) {
+                mine_map[*cursor_x - 1][*cursor_y - 1] = 0 + '0';
+                *cursor_x = *cursor_x - 1;
+                *cursor_y = *cursor_y - 1;
+                partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+                *cursor_x = *cursor_x + 1;
+                *cursor_y = *cursor_y + 1;
+            }
+        }
+
+        if (edge_limits[3] == 2) {
+            if (!position_already_counted(pointer_to_mine_map, *cursor_x - 1, *cursor_y + 1)) {
+                mine_map[*cursor_x - 1][*cursor_y + 1] = 0 + '0';
+                *cursor_x = *cursor_x - 1;
+                *cursor_y = *cursor_y + 1;
+                partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+                *cursor_x = *cursor_x + 1;
+                *cursor_y = *cursor_y - 1;
+            }
+        }
+    }
+
+    if (edge_limits[3] == 2) {
+        if (!position_already_counted(pointer_to_mine_map, *cursor_x, *cursor_y + 1)) {
+            mine_map[*cursor_x][*cursor_y + 1] = 0 + '0';
+            *cursor_y = *cursor_y + 1;
+            partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+            *cursor_y = *cursor_y - 1;
+        }
+
+        if (edge_limits[1] == 2) {
+            if (!position_already_counted(pointer_to_mine_map, *cursor_x + 1, *cursor_y + 1)) {
+                mine_map[*cursor_x + 1][*cursor_y + 1] = 0 + '0';
+                *cursor_x = *cursor_x + 1;
+                *cursor_y = *cursor_y + 1;
+                partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+                *cursor_x = *cursor_x - 1;
+                *cursor_y = *cursor_y - 1;
+            }
+        }
+    }
+
+    if (edge_limits[1] == 2) {
+        if (!position_already_counted(pointer_to_mine_map, *cursor_x + 1, *cursor_y)) {
+            mine_map[*cursor_x + 1][*cursor_y] = 0 + '0';
+            *cursor_x = *cursor_x + 1;
+            partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+            *cursor_x = *cursor_x - 1;
+        }
+
+        if (edge_limits[2] == -1) {
+            if (!position_already_counted(pointer_to_mine_map, *cursor_x + 1, *cursor_y - 1)) {
+                mine_map[*cursor_x + 1][*cursor_y - 1] = 0 + '0';
+                *cursor_x = *cursor_x + 1;
+                *cursor_y = *cursor_y - 1;
+                partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+                *cursor_x = *cursor_x - 1;
+                *cursor_y = *cursor_y + 1;
+            }
+        }
+    } 
+
+
+    if (edge_limits[2] == -1 && 
+        !position_already_counted(pointer_to_mine_map, *cursor_x, *cursor_y - 1)) {
+        mine_map[*cursor_x][*cursor_y - 1] = 0 + '0';
+        *cursor_y = *cursor_y - 1;
+        partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
+        *cursor_y = *cursor_y + 1;
+    }
+
+    mine_map[*cursor_x][*cursor_y] = 'X';
+
+    // printf("%d %d\n", *cursor_x, *cursor_y);
+    // print_mine_map(pointer_to_mine_map, M, N);
+    // printf("\n\n");
     
-    bool available_position = light_near_positions_and_fallback(pointer_to_mine_map, cursor_x, cursor_y, M, N);
 
     free(edge_limits);
     
-    if (available_position) {
-        return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-    } else {
-
-        bool flip_back = false;
-        if (*cursor_y + 2 < *N) {
-            if ((mine_map[*cursor_x][*cursor_y + 2] == 'X' || mine_map[*cursor_x][*cursor_y + 2] == '0')) {
-                *cursor_y = *cursor_y + 2;
-                flip_back = true;
-                return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-            }
-        } else {
-            if (*cursor_y - 2 >= 0 && flip_back) {
-                if ((mine_map[*cursor_x][*cursor_y - 2] == 'X' || mine_map[*cursor_x][*cursor_y - 2] == '0')) {
-                    *cursor_y = *cursor_y - 2;
-                    if (flip_back) return;
-                    return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-                }
-            }
-        }
-
-        if (*cursor_x + 2 < *M) {
-            if ((mine_map[*cursor_x + 2][*cursor_y] == 'X' || mine_map[*cursor_x + 2][*cursor_y] == '0')) {
-                *cursor_x = *cursor_x + 2;
-                return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-            }
-        } else {
-            if (*cursor_x - 2 >= 0) {
-                if ((mine_map[*cursor_x - 2][*cursor_y] == 'X' || mine_map[*cursor_x - 2][*cursor_y] == '0')) {
-                    *cursor_x = *cursor_x - 2;
-                    return partially_hide_map(pointer_to_mine_map, cursor_x, cursor_y, M, N);
-                }
-            }
-        }
-        
-        return;
-    }
 }
 
 
@@ -476,7 +453,7 @@ void user_flow_after_chosen_position(char*** pointer_to_mine_map, int* M, int* N
 }
 
 void user_control(char*** pointer_to_mine_map, int* M, int* N) {
-    int cursor_x = 8;
+    int cursor_x = 0;
     int cursor_y = 0;
     scanf("%d ", &cursor_x);
     scanf("%d ", &cursor_y);
