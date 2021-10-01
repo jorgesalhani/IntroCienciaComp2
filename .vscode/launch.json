@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/jorge/Documents/IntroCienciaComp2/RunCodes/Trabalho01/t01",
+            "program": "/home/jorge/Documents/IntroCienciaComp2/RunCodes/Trabalho02/t02",
             "args": ["2.in"],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",
