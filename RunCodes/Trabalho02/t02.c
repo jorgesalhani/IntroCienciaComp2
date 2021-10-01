@@ -10,10 +10,10 @@ Titulo:     Trabalho 02: Tratamento de audio
 #include <complex.h>
 
 FILE* read_wav_filename(void) {
-    // char wav_filename[100];
-    // scanf("%s ", wav_filename);
+    char wav_filename[100];
+    scanf("%s ", wav_filename);
 
-    char wav_filename[50] = "cat.wav";   
+    // char wav_filename[50] = "bubble.wav";   // TEST
     FILE* wav_file = fopen(wav_filename, "rb");
     if (wav_file == NULL) {
         perror("Error opening file!\n");
@@ -24,8 +24,8 @@ FILE* read_wav_filename(void) {
 }
 
 void read_compression_coeff_input(int* compression_coeff) {
-    // scanf("%d ", compression_coeff);
-    *compression_coeff = 100;
+    scanf("%d ", compression_coeff);
+    // *compression_coeff = 100; // TEST
 }
 
 unsigned char* store_wav_binary_content(FILE* fp, int* content_length) {
@@ -46,6 +46,23 @@ unsigned char* store_wav_binary_content(FILE* fp, int* content_length) {
     return data;
 }
 
+double complex* discrete_fourier_transform_coefficients(unsigned char** pointer_to_wav_content, int* content_length) {
+    unsigned char* wav_content = *pointer_to_wav_content;
+    int length = *content_length;
+
+    double complex* fourier_coeffs = NULL;
+    fourier_coeffs = calloc(length, sizeof(double complex));
+
+    for (int i = 0; i < length; i++) {
+        for (int j = 0; j < length; j++) {
+            fourier_coeffs[i] += wav_content[j] * cexp((-2.0 * M_PI * (((i+1) * j * 1.0) / (length * 1.0))) * _Complex_I);
+        }
+        // printf("%.1lf + %.1lfi\n", creal(fourier_coeffs[i]), cimag(fourier_coeffs[i]));
+    }
+
+    return fourier_coeffs;
+}
+
 
 int main (void) {
     FILE* wav_file = read_wav_filename();
@@ -54,13 +71,15 @@ int main (void) {
     read_compression_coeff_input(&compression_coeff);
 
     int content_length = 0;
-    unsigned char* wav_file_content = NULL;
-    wav_file_content = store_wav_binary_content(wav_file, &content_length);
+    unsigned char* wav_content = NULL;
+    wav_content = store_wav_binary_content(wav_file, &content_length);
 
-    for(int i = 0; i<10; i++) printf("%hhx ", wav_file_content[i]);
-    printf("\n");
+    double complex* fourier_coefficients = NULL;
+    fourier_coefficients = discrete_fourier_transform_coefficients(&wav_content, &content_length);
 
-    free(wav_file_content);
+    free(fourier_coefficients);
+
+    free(wav_content);
 
     return 0;
 }
