@@ -16,17 +16,27 @@ int* aloca_e_preenche_vetor(int n) {
 }
 
 int maiores(int valor, int* vetor, int n) {
-    int qtd_maiores = 0;                        // (a) 
-    for (int i = 0; i < n; i++) {               // 1. (a + c) ; 2. (2a + c)*(n-1)
-        if (vetor[i] > valor) {                 // (p + c) * n
-            qtd_maiores++;                      // (2a) * n
-        }
-    }
+                                                /** ALGORITMO
+    
+                                                Contagem de operacoes:
+                                                    - aritmeticas e comparacoes = a
+                                                    - atribuicoes = c
+                                                    - acessos a ponteiro ou vetor = p
+                                                    - retorno de funcao = r
+                                                */
+    int qtd_maiores = 0;                        // c
+                                                // | i=0        | i=1
+    for (int i = 0; i < n; i++) {               // | c + a      | a + c + a
+        if (vetor[i] > valor) {                 // | p + a      | p + a
+            qtd_maiores++;                      // | a + c -->  | a + c --> x(n-1)
+        }                                       //
+    }                                           // (3a + p + 2c) + (4a + 2c + p)(n-1)
+                                                // (4a + 2c + p)n - a
 
     return qtd_maiores;                         // r
-                                                // -----
-                                                // (a) + (a+c) + (n-1)(2a+c) + (n)(p+c) + (n)(2a) + r
-                                                // m(n) = n(4a + 2c + p) + r
+                                                // 
+                                                // (4a + 2c + p)n - a + r
+                                                // r[n] = (4a + 2c + p)n - a + r
 }
 
 int main (int argc, char* argv[]) {
@@ -59,23 +69,33 @@ int main (int argc, char* argv[]) {
         - acessos a ponteiro ou vetor = p
         - retorno de funcao = r
     */
-
-    for (int j = 0; j < n; j++) { // 1. (a + c) ; 2 em diante (2a + c)
-        vet_maiores[j] = maiores(vet[j], vet, n); // 2p + maiores
-        // maiores = m(n) = n(4a + 2c + p) + r
+                                                    // | j=0            | j=1
+    for (int j = 0; j < n; j++) {                   // | c + a          | a + c + a
+        vet_maiores[j] = maiores(vet[j], vet, n);   // | p + c + r -->  | p + c + r --> x(n-1)
+                                                    // 
+                                                    // (2c + a + p + r[n]) + (2a + 2c + p + r[n])(n-1)
+                                                    // (2a + 2c + p + r[n])n - a
         // printf("%d - existem %d > %d\n", j, vet_maiores[j], vet[j]);
     }
 
-    // f(n) = (a + c) + (n-1)(2a+c) + (n)2p + (n)(m(n))
-    // f(n) = 2na + nc - a + 2np + n(n(4a + 2c + p) + r)
-    // f(n) = n(2a + c + 2p) - a + n**2(4a + 2c + p) + nr
-    // f(n) = (4a + 2c + p)n**2 + (2a + 2p + c + r)n - a
+    /* Sendo:   r[n] = (4a + 2c + p)n - a + r e tambem:
+                (2a + 2c + p + r[n])n - a
+    
+    f(n) =  (2a + 2c + p)n + r[n].n - a
+            (2a + 2c + p)n + ((4a + 2c + p)n - a + r)n - a
+                             ((4a + 2c + p)n^2 - a.n) - a
+            (a + 2c + p)n + (4a + 2c + p)n^2 - a
 
-    // Caso a = c = r = p = C
-    //
-    // Funcao de eficiente da contagem de maiores
-    //
-    // f(n) = (7C)(n**2) + (6C)(n) - C
+    f(n) = (4a + 2c + p)n^2 + (a + 2c + p)n - a
+    
+    
+    Caso a = c = r = p = C
+
+    Funcao de eficiencia:
+
+    f(n) = (7C)n^2 + (4C)n - C
+    f(n) ~ n^2
+    */
 
     c2 = clock();
 

@@ -97,9 +97,36 @@ double* get_magnitudes(double complex** pointer_to_complex_vector, int* content_
     return vector_magnitudes;
 }
 
-int** get_original_and_sorted_positions(double complex** pointer_to_complex_vector, double** pointer_to_vector_magnitudes, int* content_length) {
-    double complex* complex_vector = *pointer_to_complex_vector;
-    double* vector_magnitudes = *pointer_to_vector_magnitudes;
+
+int* sort_magnitudes_and_get_original_positions(double* vector_magnitudes, int content_length) {
+    
+    int* sorted_positions = NULL;
+    sorted_positions = malloc(sizeof(int) * (content_length));
+    int last_cursor_position = 0;
+
+    // vm = [0 8 9 9 9 2 8]
+    // i = 3; 
+    // ce = 4;
+    // lcp = 2;
+
+
+    for (int i = 1; i < (content_length); i++) {
+        double cursor_element = vector_magnitudes[i];
+        last_cursor_position = i - 1;
+
+        while (last_cursor_position >= 0 && cursor_element < vector_magnitudes[last_cursor_position]) {
+            vector_magnitudes[last_cursor_position + 1] = vector_magnitudes[last_cursor_position];
+            last_cursor_position--;
+        }
+        sorted_positions[i - 1] = last_cursor_position + 1;
+        vector_magnitudes[i - 1] = cursor_element;
+        // printf("%lf\t%d -> %d\n", cursor_element, i, last_cursor_position + 1);
+    }
+
+    for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
+    printf("\n");
+
+    return sorted_positions;
 }
 
 int main (void) {
@@ -120,10 +147,13 @@ int main (void) {
     double* vector_magnitudes = NULL;
     vector_magnitudes = get_magnitudes(&fourier_coefficients, &content_length);
 
-    int** original_and_sorted_positions = NULL;
-    original_and_sorted_positions = get_original_and_sorted_positions(&fourier_coefficients, &vector_magnitudes, &content_length);
+    for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
+    printf("\n");
 
+    int* sorted_positions = NULL;
+    sorted_positions = sort_magnitudes_and_get_original_positions(vector_magnitudes, content_length);
 
+    free(sorted_positions);
     free(vector_magnitudes);
     free(fourier_coefficients);
 
