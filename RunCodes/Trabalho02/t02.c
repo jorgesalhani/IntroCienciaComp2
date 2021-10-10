@@ -8,6 +8,7 @@ Titulo:     Trabalho 02: Tratamento de audio
 #include <stdio.h>
 #include <math.h>
 #include <complex.h>
+#include <stdbool.h>
 
 FILE* read_wav_filename(void) {
     // char wav_filename[100];
@@ -97,28 +98,55 @@ double* get_magnitudes(double complex** pointer_to_complex_vector, int* content_
     return vector_magnitudes;
 }
 
-int* sort_magnitudes_and_get_original_positions(double* vector_magnitudes, int content_length) {
+void map_zero_position(int* sorted_positions, int new_position){
+    sorted_positions[0] = new_position-1;
+}
+
+void shift_smaller_positions_one_unit(int* sorted_positions, int number_positions_mapped, int new_position, bool first_fixed_point_found) {
+    int i = 1;
+    if (first_fixed_point_found) i = 0;
+
+    while (i < number_positions_mapped) {
+        int cursor_content = sorted_positions[i]; 
+        if (sorted_positions[i] >= new_position) {
+            sorted_positions[i] = sorted_positions[i] + 1;
+        }
+        i++;
+    }
+
+    i = 1;
+    if (first_fixed_point_found) i = 0;
+}
+
+int* sort_magnitudes_and_map_original_positions(double* vector_magnitudes, int content_length) {
     
 	int* sorted_positions = NULL;
     sorted_positions = malloc(sizeof(int) * content_length);
 
     int previous_cursor = 0;
 	double cursor_content = 0.0;
+
+    bool first_fixed_point_found = false;
+
     for (int i = 1; i < content_length; i++) {							
         cursor_content = vector_magnitudes[i];
         previous_cursor = i - 1;									
         while (previous_cursor >= 0 && vector_magnitudes[previous_cursor] > cursor_content) {			
             vector_magnitudes[previous_cursor + 1] = vector_magnitudes[previous_cursor]; 	
             previous_cursor = previous_cursor - 1;					
-        }											
-        vector_magnitudes[previous_cursor + 1] = cursor_content;
-        sorted_positions[i] = previous_cursor + 1; 				
-    }
-    sorted_positions[0] = previous_cursor + 1;
+        }
 
-    // for (int i = 0; i < content_length; i++) printf("%d   ", sorted_positions[i]);
-    // printf("\n\n");
-    
+        int new_position = previous_cursor + 1;										
+        vector_magnitudes[new_position] = cursor_content;
+        sorted_positions[i] = new_position;
+
+        if (!first_fixed_point_found && i == new_position) {
+            map_zero_position(sorted_positions, new_position);
+            first_fixed_point_found = true;
+        }
+
+        shift_smaller_positions_one_unit(sorted_positions, i, sorted_positions[i], first_fixed_point_found);
+    }
 
     return sorted_positions;
 }
@@ -146,10 +174,14 @@ int main (void) {
     printf("\n\n");
 
     int* sorted_positions = NULL;
-    sorted_positions = sort_magnitudes_and_get_original_positions(vector_magnitudes, content_length);
+    sorted_positions = sort_magnitudes_and_map_original_positions(vector_magnitudes, content_length);
 
     printf("SORTED:\n");
     for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
+    printf("\n\n");
+
+    printf("TRANSITIONS:\n");
+    for (int i = 0; i < content_length; i++) printf("%d   ", sorted_positions[i]);
     printf("\n\n");
     
 
