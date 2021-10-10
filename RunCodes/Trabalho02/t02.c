@@ -11,10 +11,10 @@ Titulo:     Trabalho 02: Tratamento de audio
 #include <stdbool.h>
 
 FILE* read_wav_filename(void) {
-    // char wav_filename[100];
-    // scanf("%s ", wav_filename);
+    char wav_filename[100];
+    scanf("%s ", wav_filename);
 
-    char wav_filename[50] = "bubble.wav";   // TEST
+    // char wav_filename[50] = "bubble.wav";   // TEST
     FILE* wav_file = fopen(wav_filename, "rb");
     if (wav_file == NULL) {
         perror("Error opening file!\n");
@@ -157,16 +157,33 @@ void zero_values_beyond_compression_coeff(double* vector_magnitudes, int compres
     }
 }
 
-double* return_magnitudes_to_original_position(double* vector_magnitudes, int* sorted_positions, int content_length) {
+double* return_magnitudes_to_original_position(double* vector_magnitudes, int* sorted_positions, int content_length, int compression_coeff) {
     double* new_vector_magnitudes = NULL;
-    new_vector_magnitudes = malloc(sizeof(double) * content_length);
-    for (int i = 0; i < content_length; i++) {
+    new_vector_magnitudes = malloc(sizeof(double) * compression_coeff);
+    int new_vector_position = 0;
+    for (int i = content_length-1; i >= 0; i--) {
         int original_position = sorted_positions[i];
-        new_vector_magnitudes[i] = vector_magnitudes[original_position];
+        if (vector_magnitudes[original_position] > 0.0) {
+            new_vector_magnitudes[new_vector_position] = vector_magnitudes[original_position];
+            new_vector_position++;
+        }
     }
 
     return new_vector_magnitudes;
 }
+
+double* discrete_inverse_fourier_transform_coefficients(double* new_vector_magnitudes, int compression_coeff) {
+    double* fourier_coeffs = NULL;
+    fourier_coeffs = calloc(compression_coeff, sizeof(double complex));
+
+    for (int i = 0; i < compression_coeff; i++) {
+        for (int j = 0; j < compression_coeff; j++) {
+            fourier_coeffs[i] += new_vector_magnitudes[j] * cexp((2.0 * M_PI * (((i+1) * j * 1.0) / (compression_coeff * 1.0))) * _Complex_I);
+        }
+        fourier_coeffs[i] *= (1/(double)(compression_coeff));
+    }
+    return fourier_coeffs;
+} 
 
 int main (void) {
     FILE* wav_file = read_wav_filename();
@@ -178,8 +195,10 @@ int main (void) {
     unsigned char* wav_content = NULL;
     wav_content = store_wav_binary_content(wav_file, &content_length);
 
-    content_length = 30; // FAST TEST
-    compression_coeff = 10;
+    // content_length = 30; // FAST TEST
+    // compression_coeff = 10;
+
+    printf("%d\n", content_length);
 
     double complex* fourier_coefficients = NULL;
     fourier_coefficients = discrete_fourier_transform_coefficients(&wav_content, &content_length);
@@ -187,36 +206,43 @@ int main (void) {
     double* vector_magnitudes = NULL;
     vector_magnitudes = get_magnitudes(&fourier_coefficients, &content_length);
 
-    printf("ORIGINAL:\n");
-    for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
-    printf("\n\n");
+    // printf("ORIGINAL:\n");
+    // for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
+    // printf("\n\n");
 
     int* sorted_positions = NULL;
     sorted_positions = sort_magnitudes_and_map_original_positions(vector_magnitudes, content_length);
 
-    printf("SORTED:\n");
-    for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
-    printf("\n\n");
+    // printf("SORTED:\n");
+    // for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
+    // printf("\n\n");
 
-    printf("TRANSITIONS:\n");
-    for (int i = 0; i < content_length; i++) printf("%d   ", sorted_positions[i]);
-    printf("\n\n");
+    // printf("TRANSITIONS:\n");
+    // for (int i = 0; i < content_length; i++) printf("%d   ", sorted_positions[i]);
+    // printf("\n\n");
 
     zero_values_beyond_compression_coeff(vector_magnitudes, compression_coeff, content_length);
     
-    printf("ZEROED:\n");
-    for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
-    printf("\n\n");
+    // printf("ZEROED:\n");
+    // for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
+    // printf("\n\n");
 
     double* new_vector_magnitudes = NULL;
-    new_vector_magnitudes = return_magnitudes_to_original_position(vector_magnitudes, sorted_positions, content_length);
+    new_vector_magnitudes = return_magnitudes_to_original_position(vector_magnitudes, sorted_positions, content_length, compression_coeff);
 
-    printf("ROLLBACK:\n");
-    for (int i = 0; i < content_length; i++) printf("%lf   ", new_vector_magnitudes[i]);
-    printf("\n\n");
+    // printf("ROLLBACK:\n");
+    // for (int i = 0; i < compression_coeff; i++) printf("%lf   ", new_vector_magnitudes[i]);
+    // printf("\n\n");
 
+    double* inverse_fourier_vector = NULL;
+    inverse_fourier_vector = discrete_inverse_fourier_transform_coefficients(new_vector_magnitudes, compression_coeff);
     
+    for (int i = 0; i < compression_coeff; i++) {
+      printf("%d\n", (int)inverse_fourier_vector[i]);  
+    }
+    printf("\n");
 
+    free(inverse_fourier_vector);
     free(new_vector_magnitudes);
     free(sorted_positions);
     free(vector_magnitudes);
