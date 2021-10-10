@@ -97,30 +97,37 @@ double* get_magnitudes(double complex** pointer_to_complex_vector, int* content_
     return vector_magnitudes;
 }
 
+void insertion_sort(int* vetor, int content_length)
+{
+	int previous_cursor = 0;
+	int cursor_content = 0;
+    for (int i = 1; i < content_length; i++) {							
+        cursor_content = vetor[i];
+        previous_cursor = i - 1;									
+        while (vetor[previous_cursor] > cursor_content) {			
+            vetor[previous_cursor + 1] = vetor[previous_cursor]; 	
+            previous_cursor = previous_cursor - 1;					
+        }															
+        vetor[previous_cursor + 1] = cursor_content;				
+    }
+}	
+
 
 int* sort_magnitudes_and_get_original_positions(double* vector_magnitudes, int content_length) {
     
-    int* sorted_positions = NULL;
-    sorted_positions = malloc(sizeof(int) * (content_length));
-    int last_cursor_position = 0;
+	int* sorted_positions = NULL;
+    sorted_positions = calloc(content_length, sizeof(int));
 
-    // vm = [0 8 9 9 9 2 8]
-    // i = 3; 
-    // ce = 4;
-    // lcp = 2;
-
-
-    for (int i = 1; i < (content_length); i++) {
-        double cursor_element = vector_magnitudes[i];
-        last_cursor_position = i - 1;
-
-        while (last_cursor_position >= 0 && cursor_element < vector_magnitudes[last_cursor_position]) {
-            vector_magnitudes[last_cursor_position + 1] = vector_magnitudes[last_cursor_position];
-            last_cursor_position--;
-        }
-        sorted_positions[i - 1] = last_cursor_position + 1;
-        vector_magnitudes[i - 1] = cursor_element;
-        // printf("%lf\t%d -> %d\n", cursor_element, i, last_cursor_position + 1);
+    int previous_cursor = 0;
+	double cursor_content = 0.0;
+    for (int i = 1; i < content_length; i++) {							
+        cursor_content = vector_magnitudes[i];
+        previous_cursor = i - 1;									
+        while (previous_cursor >= 0 && vector_magnitudes[previous_cursor] > cursor_content) {			
+            vector_magnitudes[previous_cursor + 1] = vector_magnitudes[previous_cursor]; 	
+            previous_cursor = previous_cursor - 1;					
+        }															
+        vector_magnitudes[previous_cursor + 1] = cursor_content;				
     }
 
     for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
