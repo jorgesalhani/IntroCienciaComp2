@@ -110,12 +110,17 @@ int* sort_magnitudes_and_get_original_positions(double* vector_magnitudes, int c
         while (previous_cursor >= 0 && vector_magnitudes[previous_cursor] > cursor_content) {			
             vector_magnitudes[previous_cursor + 1] = vector_magnitudes[previous_cursor]; 	
             previous_cursor = previous_cursor - 1;					
-        }															
-        vector_magnitudes[previous_cursor + 1] = cursor_content;				
+        }											
+        vector_magnitudes[previous_cursor + 1] = cursor_content;
+        sorted_positions[i] = previous_cursor + 1; 				
     }
 
     for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
-    printf("\n");
+    printf("\n\n");
+    
+    for (int i = 0; i < content_length; i++) printf("%d   ", sorted_positions[i]);
+    printf("\n\n");
+    
 
     return sorted_positions;
 }
