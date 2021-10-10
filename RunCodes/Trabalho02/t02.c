@@ -151,6 +151,23 @@ int* sort_magnitudes_and_map_original_positions(double* vector_magnitudes, int c
     return sorted_positions;
 }
 
+void zero_values_beyond_compression_coeff(double* vector_magnitudes, int compression_coeff, int content_length) {
+    for (int i = 0; i < (content_length - compression_coeff); i++) {
+        vector_magnitudes[i] = 0.0;
+    }
+}
+
+double* return_magnitudes_to_original_position(double* vector_magnitudes, int* sorted_positions, int content_length) {
+    double* new_vector_magnitudes = NULL;
+    new_vector_magnitudes = malloc(sizeof(double) * content_length);
+    for (int i = 0; i < content_length; i++) {
+        int original_position = sorted_positions[i];
+        new_vector_magnitudes[i] = vector_magnitudes[original_position];
+    }
+
+    return new_vector_magnitudes;
+}
+
 int main (void) {
     FILE* wav_file = read_wav_filename();
 
@@ -162,6 +179,7 @@ int main (void) {
     wav_content = store_wav_binary_content(wav_file, &content_length);
 
     content_length = 30; // FAST TEST
+    compression_coeff = 10;
 
     double complex* fourier_coefficients = NULL;
     fourier_coefficients = discrete_fourier_transform_coefficients(&wav_content, &content_length);
@@ -183,8 +201,23 @@ int main (void) {
     printf("TRANSITIONS:\n");
     for (int i = 0; i < content_length; i++) printf("%d   ", sorted_positions[i]);
     printf("\n\n");
+
+    zero_values_beyond_compression_coeff(vector_magnitudes, compression_coeff, content_length);
+    
+    printf("ZEROED:\n");
+    for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
+    printf("\n\n");
+
+    double* new_vector_magnitudes = NULL;
+    new_vector_magnitudes = return_magnitudes_to_original_position(vector_magnitudes, sorted_positions, content_length);
+
+    printf("ROLLBACK:\n");
+    for (int i = 0; i < content_length; i++) printf("%lf   ", new_vector_magnitudes[i]);
+    printf("\n\n");
+
     
 
+    free(new_vector_magnitudes);
     free(sorted_positions);
     free(vector_magnitudes);
     free(fourier_coefficients);
