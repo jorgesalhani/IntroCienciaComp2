@@ -97,26 +97,10 @@ double* get_magnitudes(double complex** pointer_to_complex_vector, int* content_
     return vector_magnitudes;
 }
 
-void insertion_sort(int* vetor, int content_length)
-{
-	int previous_cursor = 0;
-	int cursor_content = 0;
-    for (int i = 1; i < content_length; i++) {							
-        cursor_content = vetor[i];
-        previous_cursor = i - 1;									
-        while (vetor[previous_cursor] > cursor_content) {			
-            vetor[previous_cursor + 1] = vetor[previous_cursor]; 	
-            previous_cursor = previous_cursor - 1;					
-        }															
-        vetor[previous_cursor + 1] = cursor_content;				
-    }
-}	
-
-
 int* sort_magnitudes_and_get_original_positions(double* vector_magnitudes, int content_length) {
     
 	int* sorted_positions = NULL;
-    sorted_positions = calloc(content_length, sizeof(int));
+    sorted_positions = malloc(sizeof(int) * content_length);
 
     int previous_cursor = 0;
 	double cursor_content = 0.0;
