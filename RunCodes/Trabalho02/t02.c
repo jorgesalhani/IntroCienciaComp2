@@ -114,12 +114,10 @@ int* sort_magnitudes_and_get_original_positions(double* vector_magnitudes, int c
         vector_magnitudes[previous_cursor + 1] = cursor_content;
         sorted_positions[i] = previous_cursor + 1; 				
     }
+    sorted_positions[0] = previous_cursor + 1;
 
-    for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
-    printf("\n\n");
-    
-    for (int i = 0; i < content_length; i++) printf("%d   ", sorted_positions[i]);
-    printf("\n\n");
+    // for (int i = 0; i < content_length; i++) printf("%d   ", sorted_positions[i]);
+    // printf("\n\n");
     
 
     return sorted_positions;
@@ -143,11 +141,17 @@ int main (void) {
     double* vector_magnitudes = NULL;
     vector_magnitudes = get_magnitudes(&fourier_coefficients, &content_length);
 
+    printf("ORIGINAL:\n");
     for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
-    printf("\n");
+    printf("\n\n");
 
     int* sorted_positions = NULL;
     sorted_positions = sort_magnitudes_and_get_original_positions(vector_magnitudes, content_length);
+
+    printf("SORTED:\n");
+    for (int i = 0; i < content_length; i++) printf("%lf   ", vector_magnitudes[i]);
+    printf("\n\n");
+    
 
     free(sorted_positions);
     free(vector_magnitudes);
