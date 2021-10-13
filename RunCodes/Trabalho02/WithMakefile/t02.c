@@ -240,6 +240,7 @@ int main (void) {
     for (int i = content_length-1; i >= (content_length - compression_coeff); i--) {
       printf("%d\n", (int)vector_magnitudes[i]);  
     }
+    printf("\n");
 
     free(inverse_fourier_vector);
     free(new_fourier_coefficients);
