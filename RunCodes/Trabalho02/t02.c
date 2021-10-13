@@ -65,15 +65,9 @@ double complex* discrete_fourier_transform_coefficients(unsigned char** pointer_
 
 void count_non_positive_vector_components(int* non_positive_vector_components, double complex complex_vector) {
     int local_count = *non_positive_vector_components;
-    if (creal(complex_vector) <= 0) {
+    if (creal(complex_vector) <= 0 && cimag(complex_vector) <= 0) {
         *non_positive_vector_components = local_count + 1;
     }
-
-    local_count = *non_positive_vector_components;
-
-    if (cimag(complex_vector) <= 0) {
-        *non_positive_vector_components = local_count + 1;
-    } 
 }
 
 double* get_magnitudes(double complex** pointer_to_complex_vector, int* content_length) {
