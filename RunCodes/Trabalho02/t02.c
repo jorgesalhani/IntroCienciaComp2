@@ -179,6 +179,20 @@ double complex* discrete_inverse_fourier_transform_coefficients(double complex* 
     return fourier_coeffs;
 } 
 
+void write_new_wav_file(unsigned char* wav_content, double complex* inverse_fourier_vector, int compression_coeff) {
+    FILE* new_wav = fopen("compress_audio.wav", "wb");
+    unsigned char buffer[44];
+
+    fwrite(wav_content, sizeof(buffer), 1, new_wav);
+
+    // for (int i = 0; i < compression_coeff; i++) {
+    //     int cast_value = (int) inverse_fourier_vector[i];
+    //     fwrite(&cast_value, sizeof(unsigned char), 1, new_wav);
+    // }
+
+    fclose(new_wav);
+}
+
 int main (void) {
     FILE* wav_file = read_wav_filename();
 
@@ -224,8 +238,6 @@ int main (void) {
     double complex* new_fourier_coefficients = NULL;
     new_fourier_coefficients = return_magnitudes_to_original_position(fourier_coefficients, vector_magnitudes, sorted_positions, content_length, compression_coeff);
 
-
-
     // printf("ROLLBACK:\n");
     // for (int i = 0; i < compression_coeff; i++) printf("%.2lf + %.2lfi\n", creal(new_fourier_coefficients[i]), cimag(new_fourier_coefficients[i]));
     // printf("\n\n");
@@ -240,6 +252,9 @@ int main (void) {
     for (int i = content_length-1; i >= (content_length - compression_coeff); i--) {
       printf("%d\n", (int)vector_magnitudes[i]);  
     }
+
+    write_new_wav_file(wav_content, inverse_fourier_vector, compression_coeff);
+
 
     free(inverse_fourier_vector);
     free(new_fourier_coefficients);
