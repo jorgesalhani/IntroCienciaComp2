@@ -9,27 +9,58 @@ Titulo:     Exercicio 2: Compressao de imagem com quadtree
 #include <stdbool.h>
 
 void get_image_dimensions(int* M, int* N){
-    scanf("%d ", M);
-    scanf("%d ", N);
-    // *M = 4;
-    // *N = 4;
+    // scanf("%d ", M);
+    // scanf("%d ", N);
+    *M = 4;
+    *N = 4;
 }
 
 int** store_image(int* M, int* N) {
     int** image_matrix = NULL;
     image_matrix = (int**)malloc(sizeof(int*)*(*M));
-    // int mock_matrix[4][4] = {
-    //     {1, 1, 1, 1}, 
-    //     {2, 2, 1, 1}, 
-    //     {2, 2, 1, 1}, 
-    //     {2, 2, 3, 4}, 
+    // int mock_matrix[16][16] = {
+    //     {1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5}, 
+    //     {2, 2, 1, 1, 2, 2, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5}, 
+    //     {2, 2, 1, 1, 2, 2, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5}, 
+    //     {2, 2, 3, 4, 2, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5}, 
+    //     {1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5}, 
+    //     {2, 2, 1, 1, 2, 2, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5}, 
+    //     {2, 2, 1, 1, 2, 2, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5}, 
+    //     {2, 2, 3, 4, 2, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5}, 
+    //     {1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 7, 7, 7, 7}, 
+    //     {2, 2, 1, 1, 2, 2, 1, 1, 6, 6, 6, 6, 7, 7, 7, 7}, 
+    //     {2, 2, 1, 1, 2, 2, 1, 1, 6, 6, 6, 6, 7, 7, 7, 7}, 
+    //     {2, 2, 3, 4, 2, 2, 3, 4, 6, 6, 6, 6, 7, 7, 7, 7}, 
+    //     {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 9, 9, 9, 9, 9, 9}, 
+    //     {2, 2, 1, 1, 2, 2, 1, 1, 8, 8, 9, 9, 9, 9, 9, 9}, 
+    //     {2, 2, 1, 1, 2, 2, 1, 1, 9, 9, 9, 9, 9, 9, 9, 9}, 
+    //     {2, 2, 3, 4, 2, 2, 3, 4, 9, 9, 9, 9, 9, 9, 9, 9}, 
     // };
 
+    int mock_matrix[4][4] = {
+        {1, 1, 1, 1}, 
+        {2, 2, 1, 1}, 
+        {2, 2, 1, 1}, 
+        {2, 2, 3, 4}, 
+    };
+    
+    
+    // int mock_matrix[8][8] = {
+    //     {1, 1, 1, 1, 1, 1, 1, 1}, 
+    //     {1, 1, 1, 1, 1, 1, 1, 1}, 
+    //     {1, 1, 1, 1, 1, 1, 1, 1}, 
+    //     {1, 1, 1, 1, 1, 1, 1, 1}, 
+    //     {2, 2, 2, 2, 2, 2, 2, 2}, 
+    //     {2, 2, 2, 2, 2, 2, 2, 2}, 
+    //     {2, 2, 2, 2, 2, 2, 2, 2}, 
+    //     {2, 2, 2, 2, 2, 2, 2, 2}, 
+    // };
+    
     for (int i = 0; i < *M; i++) {
         image_matrix[i] = (int*)malloc(sizeof(int)*(*N));
         for (int j = 0; j < *N; j++) {
-            scanf("%d ", &image_matrix[i][j]);
-            // image_matrix[i][j] = mock_matrix[i][j];
+            // scanf("%d ", &image_matrix[i][j]);
+            image_matrix[i][j] = mock_matrix[i][j];
         }
     }
 
@@ -54,153 +85,95 @@ void print_matrix(int*** image_matrix_pointer, int* M, int* N) {
     }
 }
 
-void get_unit_leafs(int*** image_matrix_pointer, int* start_M, int* start_N) {
-    int** image_matrix = *image_matrix_pointer;
-
-    int top_left = image_matrix[*start_M][*start_N];
-    int top_right = image_matrix[*start_M][*start_N + 1];
-    int bottom_left = image_matrix[*start_M + 1][*start_N];
-    int bottom_right = image_matrix[*start_M + 1][*start_N + 1];
-
-    printf("%d %d %d %d ", top_left, top_right, bottom_left, bottom_right);
+int* get_image_limits(int* M, int* N) {
+    int* limits = NULL;
+    limits = malloc(sizeof(int) * 2);
+    limits[0] = (*M);
+    limits[1] = (*N);
+    return limits;
 }
 
-int is_quadrant_leaf(int*** image_matrix_pointer, int* start_M, int* start_N, int* end_M, int* end_N){
-    int** image_matrix = *image_matrix_pointer;
-
-    int first_content = image_matrix[*start_M][*start_N];
-
-    if (((*end_M == 1) && (*end_N == 1)) || ((*end_M == *start_M) && (*end_N == *start_N))) {
-        get_unit_leafs(image_matrix_pointer, start_M, start_N);
-        return first_content;
-    }
-
-    for (int i = *start_M; i < *end_M; i++) {
-        for (int j = *start_N; j < *end_N; j++) {
-            if (image_matrix[i][j] != first_content) {
-                printf("%d ", -1);
-                return -1;
-            }
-        }
-    }
-
-    printf("%d ",first_content);
-    return first_content;
+int** get_centers(int* M, int* N) {
+    int** center = malloc(sizeof(int*) * 1);
+    int* center[0] = malloc(sizeof(int) * 2);
+    int m, n;
+    m = (*M) / 2;
+    n = (*N) / 2;
+    center[0][0] = m;
+    center[0][1] = n;
+    return center;
 }
 
-void get_subdivide_quadrant_limits(int* end_M, int* end_N, int* quadrant) {
-    int new_M, new_N;
+void move_center(int** image_center_pointer, int** cursor_pointer) {
+    int* center = *image_center_pointer;
+    int* cursor = *cursor_pointer;
 
-    if (*quadrant == 1) {
-        new_M = (*end_M)/2;
-        new_N = (*end_N)/2;
-    }
-
-    if (*quadrant == 3) {
-        new_M = (*end_M)/2;
-        new_N = (*end_N)/2;
-    }
-
-    if (*quadrant == 2) {
-        new_M = (*end_M)/2;
-        new_N = (*end_N)/2;
-    }
-    
-    if (*quadrant == 4) {
-        new_M = (*end_M)/2;
-        new_N = (*end_N)/2;
-    }
-
-    *end_M = new_M;
-    *end_N = new_N;
-}
-
-void get_parent_quadrant_limits(int* start_M, int* start_N, int* end_M, int* end_N, int* quadrant) {
-    int new_start_M, new_start_N;
-    int new_end_M, new_end_N;
-
-    if (*quadrant == 1) {
-        new_start_M = 0;
-        new_end_M = (*end_M)*2;
-
-        new_start_N = 0;
-        new_end_N = (*end_N)*2;
-    }
-
-    if (*quadrant == 3) {
-        new_start_M = (*end_M)*2;
-        new_end_M = (*end_M)*8;
-
-        new_start_N = 0;
-        new_end_N = (*end_N)*2;
-    }
-
-    if (*quadrant == 2) {
-        new_start_M = 0;
-        new_end_M = (*end_N)*2;
-
-        new_start_N = (*end_N);
-        new_end_N = (*end_N)*4;
-    }
-
-    if (*quadrant == 4) {
-        new_start_M = (*start_M);
-        new_end_M = (*end_M)*2;
-
-        new_start_N = (*start_M);
-        new_end_N = (*end_M)*2;
-    }
-
-    *start_M = new_start_M;
-    *start_N = new_start_N;
-
-    *end_M = new_end_M;
-    *end_N = new_end_N;
-}
-
-void quadtree_divide(int*** image_matrix_pointer, int* start_M, int* start_N, int* end_M, int* end_N, int* quadrant) {
-
-    get_subdivide_quadrant_limits(end_M, end_N, quadrant);
-
-    int is_leaf = is_quadrant_leaf(image_matrix_pointer, start_M, start_N, end_M, end_N);
-
-    if (is_leaf == -1) {
-        quadtree_divide(image_matrix_pointer, start_M, start_N, end_M, end_N, quadrant);
+    if (cursor[0] < center[0]) {
+        center[0] /= 2;
     } else {
-        int quadrant_ = *quadrant + 1;
-        if (quadrant_ <= 4) {
-            *quadrant = quadrant_;
-            get_parent_quadrant_limits(start_M, start_N, end_M, end_N, quadrant);
-            quadtree_divide(image_matrix_pointer, start_M, start_N, end_M, end_N, quadrant);
-        }
+        center[0] *= 2;
     }
 
-    // if (*end_M <= ((*end_M)*2) || *end_N <= ((*end_N)*2)){
-    //     return quadtree_divide(image_matrix_pointer, start_M, start_N, end_M, end_N);
-    // }
+    if (cursor[1] < center[1]) {
+        center[1] /= 2;
+    } else {
+        center[1] *= 2;
+    }
+}
 
+int quadtree(int*** image_matrix_pointer, int*** image_centers_pointer, int** image_limits_pointer, int* leafs) {
+    int** matrix = *image_matrix_pointer;
+    int** centers = *image_centers_pointer;
+    int* limits = *image_limits_pointer;
+
+    int col, line;
+    int* cursor = NULL;
+    cursor = malloc(sizeof(int) * 2);
+    cursor[0] = 0;
+    cursor[1] = 0;
+    
+    line = 0;
+    while (line < limits[1]) {
+        col = 0;
+        while (col < limits[0]) {
+            printf("%d\n", matrix[line][col]);
+            if (matrix[line][col] != matrix[cursor[0]][cursor[1]]) {
+                int leafs_ = (*leafs) + 1;
+                (*leafs) = leafs_;
+                move_center(image_center_pointer, &cursor);
+                quadtree(image_matrix_pointer, image_center_pointer, image_limits_pointer, leafs);
+            }
+            col++;
+        }
+        line++;
+    }
+
+    free(cursor);
+    return (*leafs);
 }
 
 int main(void) {
-    int M, N, original_M;
+    int M, N;
     get_image_dimensions(&M, &N);
-    original_M = M;
+    int* image_limits = NULL;
+    image_limits = get_image_limits(&M, &N);
 
     int** image_matrix = NULL;
     image_matrix = store_image(&M, &N);
 
-    // print_matrix(&image_matrix, &M, &N);
+    print_matrix(&image_matrix, &M, &N);
 
-    int start_M, start_N, quadrant;
-    start_M = 0;
-    start_N = 0;
-    quadrant = 1;
-    int is_leaf = -1;
-    printf("%d ", is_leaf);
-    quadtree_divide(&image_matrix, &start_M, &start_N, &M, &N, &quadrant);
+    int** image_center = NULL;
+    image_center = get_centers(&M, &N);
+
+    int leafs = -1;
+    printf("%d\n", leafs);
+    quadtree(&image_matrix, &image_center, &image_limits, &leafs);
+
     printf("\n");
 
-    free_matrix(&image_matrix, &original_M);
+    free_matrix(&image_center, &leafs);
+    free_matrix(&image_matrix, &M);
 
     return 0;
 }
