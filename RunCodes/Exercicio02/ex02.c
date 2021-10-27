@@ -140,8 +140,8 @@ int quadtree(int*** image_matrix_pointer, int*** image_centers_pointer, int** im
             if (matrix[line][col] != matrix[cursor[0]][cursor[1]]) {
                 int leafs_ = (*leafs) + 1;
                 (*leafs) = leafs_;
-                move_center(image_center_pointer, &cursor);
-                quadtree(image_matrix_pointer, image_center_pointer, image_limits_pointer, leafs);
+                move_center(image_centers_pointer, &cursor);
+                quadtree(image_matrix_pointer, image_centers_pointer, image_limits_pointer, leafs);
             }
             col++;
         }
