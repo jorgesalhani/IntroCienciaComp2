@@ -27,9 +27,10 @@ void main(void) {
             stree(root, root, *(s+c));
         }
         c++;
+        printf("CURSOR: %p %p %c\n", root->left, root->right, root->info);
     } while (c < strlen(s));
 
-    print_tree(root, NULL);
+    print_tree(root, 0);
 }
 
 struct tree *stree(struct tree *root, struct tree *r, char info) {
@@ -47,7 +48,7 @@ struct tree *stree(struct tree *root, struct tree *r, char info) {
             return r;
         }
 
-        if (info < root -> info) {
+        if (info != root -> info) {
             root -> left = r;
         } else {
             root -> right = r;
@@ -55,11 +56,14 @@ struct tree *stree(struct tree *root, struct tree *r, char info) {
         return r;
     }
 
-    if (info < r -> info) {
+    if (info != r -> info) {
         stree(r, r -> left, info);
     } else {
         stree(r, r -> right, info);
     }
+    printf("ROOT: %p %p %c\n", root->left, root->right, root->info);
+    printf("R: %p %p %c\n\n", r->left, r->right, r->info);
+
 }
 
 void print_tree(struct tree *r, int l) {
