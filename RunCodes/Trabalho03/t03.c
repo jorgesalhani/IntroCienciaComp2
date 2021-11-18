@@ -37,7 +37,7 @@ int** store_list(int* N) {
         process_list[line_cursor][column_cursor] = file_item;
 
         column_cursor = (column_cursor + 1) % 4;
-        if (column_cursor == 0) {
+        if (column_cursor == 0 && !feof(process_file)) {
             line_cursor++;
             process_list = realloc(process_list, sizeof(int*)*(line_cursor+1));
             process_list[line_cursor] = malloc(sizeof(int)*4);
@@ -45,8 +45,15 @@ int** store_list(int* N) {
     }
 
     (*N) = line_cursor+1;
+    for (int i = 0; i < *N; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("%d ", process_list[i][j]);
+        }
+        printf("\n");
+    }
 
     fclose(process_file);
+    return process_list;
 }
 
 void free_matrix(int** process_list, int* N) {
