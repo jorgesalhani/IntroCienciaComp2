@@ -45,12 +45,6 @@ int** store_list(int* N) {
     }
 
     (*N) = line_cursor+1;
-    for (int i = 0; i < *N; i++) {
-        for (int j = 0; j < 4; j++) {
-            printf("%d ", process_list[i][j]);
-        }
-        printf("\n");
-    }
 
     fclose(process_file);
     return process_list;
