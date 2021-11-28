@@ -13,6 +13,14 @@
  * Jorge Salhani - 2021
  */
 
+typedef struct rec
+{
+    int chave;
+    float valor;
+    char letra;
+} Registro;
+
+
 void countingsort(int*v, int N) {
 
     /**
@@ -94,6 +102,79 @@ void countingsort(int*v, int N) {
     free(C);
 }
 
+void countingsort_register(Registro* r, int N) {
+
+    int max, min, i, j;
+
+    // 0 - Encontrar máximo e minimo
+    //     Fazer copia do vetor original (manter ordenaçao das structs)
+
+    Registro *cop = (Registro*)malloc(sizeof(Registro) * N);
+
+    max = min = r[0].chave;
+    for (int i = 0; i < N; i++) {
+        if (r[i].chave > max) max = r[i].chave;
+        if (r[i].chave < min) min = r[i].chave;
+        cop[i] = r[i];
+    }
+
+    int tam_c = (max-min)+1;
+    int *C = (int*)calloc(tam_c, sizeof(int));
+
+    for (int i = 0; i < N; i++) {
+        int pos_chave = r[i].chave-min;
+        C[pos_chave]++;
+    }
+
+    /**
+     * @brief
+     * 
+     * [(4,X), (1,A), (3,C), (4,C), (1,M)]
+     * 
+     * chave = 1 2 3 4
+     * pos   = 0 1 2 3
+     *        [2,0,1,2]
+     * 
+     * contagem acumulada
+     *        [0,2,2,3]
+     */
+
+    // 3 - Percorrer o veto de contagem
+    //   - Produzir uma contagem acumulage (histograma de frequencia cumulativa)
+
+    int total = 0;
+    for (j = 0; j < tam_c; j++) {
+        int cont = C[j];
+        C[j] = total;
+        total = total + cont;
+    }
+
+    // 4 - Reposicionar os registros em sua posicao ordenada usando como base
+    //     o histograma cumulativo
+    /**
+     * @brief 
+     * 
+     *        1 2 3 4
+     *        0 1 2 3
+     * C   = [0,2,2,3]
+     * 
+     *         0      1      2      3      4
+     * r   = [(4,X), (1,A), (3,C), (4,C), (1,M)]
+     * cop = [(4,X), (1,A), (3,C), (4,C), (1,M)]
+     * 
+     */
+
+    for (int i = 0; i < N; i++) {
+        int pos = C[cop[i].chave-min]; // Acha a posicao correta do registro i
+
+        r[pos] = cop[i];
+        C[cop[i].chave-min]++;
+    }
+
+    free(cop);
+    free(C);
+}
+
 int main(void) {
     
     int N = 10;
@@ -115,7 +196,30 @@ int main(void) {
     for (i = 0; i < N; i++) {
         printf("%d ", v[i]);
     }
+    printf("\n\n");
+
+    Registro *r = (Registro *) malloc(sizeof(Registro) * N);
+    printf("Registro a ordenar: ");
+    for (i = 0; i < N; i++) {
+        r[i].chave = (rand()%(int)(N / 3.0)) + minc; // 1/3 do vetor para ter repeticao
+        r[i].valor = (float)i+1;
+        r[i].letra = (char)(rand()%(90-65+1)) + (65);
+        printf("(%d, %.1f, %c) ", r[i].chave, r[i].valor, r[i].letra);
+    }
     printf("\n");
+
+    countingsort_register(r, N);
+
+    printf("Registro ordenado: ");
+    for (i = 0; i < N; i++) {
+        r[i].chave = (rand()%(int)(N / 3.0)) + minc; // 1/3 do vetor para ter repeticao
+        r[i].valor = (float)i+1;
+        r[i].letra = (char)(rand()%(90-65+1)) + (65);
+        printf("(%d, %.1f, %c) ", r[i].chave, r[i].valor, r[i].letra);
+    }
+    printf("\n");
+
+    free(r);
 
     free(v);
 
