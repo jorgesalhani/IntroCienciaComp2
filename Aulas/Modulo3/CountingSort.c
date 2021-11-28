@@ -162,6 +162,7 @@ void countingsort_register(Registro* r, int N) {
      * r   = [(4,X), (1,A), (3,C), (4,C), (1,M)]
      * cop = [(4,X), (1,A), (3,C), (4,C), (1,M)]
      * 
+     * Mantem a posiçao relativa dos elementos: Algoritmo estável
      */
 
     for (int i = 0; i < N; i++) {
