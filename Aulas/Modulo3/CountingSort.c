@@ -8,6 +8,7 @@
  * Limitacoes
  *  - natural para inteiros
  *  - faz mais sentido quado há repetição de chaves
+ *  - faz mais sentido quando o intervalo das chaves (K): K <= N
  * 
  * Jorge Salhani - 2021
  */
@@ -39,32 +40,38 @@ void countingsort(int*v, int N) {
      */
 
     // 0 - encontrar chaves min e max
-    int max, min;
-    max = min = v[0];
+    int max, min;                               // Operacoes
+    max = min = v[0];                           // a - aritmetica;
+                                                // b - atribuicao;
+                                                // c - comparacao; 
     for (int i = 1; i < N; i++) {
-        if (v[i] > max) max = v[i];
-        if (v[i] < min) min = v[i];
+        if (v[i] > max) max = v[i];             // c+b
+        if (v[i] < min) min = v[i];             // c+b
     }
+                                                // 2(c+b)N
 
     // 1 - criar vetor de contagem
     int tam_c = (max-min)+1;
-    int *C = (int*) calloc(tam_c, sizeof(int));
+    int *C = (int*) calloc(tam_c, sizeof(int)); // Kb
 
     // 2 - contar frequencia de cada chave
     for (int i = 0; i < N; i++) {
-        int pos_chave = v[i] - min;
-        C[pos_chave]++;
-    }
+        int pos_chave = v[i] - min;             // a
+        C[pos_chave]++;                         // a
+    }                                           // (2a)N
 
     // 3 - recriar o vetor usando as frequencias
     int i = 0;
     for (int j = 0; j < tam_c; j++) {
-        while (C[j]) {
-            v[i] = j+min;
-            C[j]--;
-            i++;
+        while (C[j]) {                          // c
+            v[i] = j+min;                       // a
+            C[j]--;                             // a
+            i++;                                // a
         }
-    }
+    }                                           // (K + N)(c+3a)
+
+                                                // f(n) = N(2(c + b)) + Kb + N(2a + c + 3a)
+                                                // f(n) = N(5a + 2b + 5c) + K(3a + b + c)
 
     /**
      * @brief 
