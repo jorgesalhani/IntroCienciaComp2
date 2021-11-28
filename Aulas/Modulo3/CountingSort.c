@@ -87,15 +87,17 @@ void countingsort(int*v, int N) {
     free(C);
 }
 
-int main(int argc, char* argv[]) {
+int main(void) {
     
-    int N = atoi(argv[1]);
+    int N = 10;
+    int minc = 100;
+
     int *v = (int*) malloc(sizeof(int) * N);
 
     int i = 0;
     printf("Vetor a ordenar: ");
     for (i = 0; i < N; i++) {
-        v[i] = rand()%(int)(N / 3.0); // 1/3 do vetor para ter repeticao
+        v[i] = (rand()%(int)(N / 3.0)) + minc; // 1/3 do vetor para ter repeticao
         printf("%d ", v[i]);
     }
     printf("\n");
