@@ -61,7 +61,7 @@ void countingsort(int*v, int N) {
     for (int j = 0; j < tam_c; j++) {
         while (C[j]) {
             v[i] = j+min;
-            c[j]--;
+            C[j]--;
             i++;
         }
     }
@@ -85,10 +85,6 @@ void countingsort(int*v, int N) {
      */
 
     free(C);
-
-
-
-
 }
 
 int main(int argc, char* argv[]) {
@@ -108,7 +104,6 @@ int main(int argc, char* argv[]) {
 
     printf("Vetor ordenado: ");
     for (i = 0; i < N; i++) {
-        v[i] = rand()%(int)(N / 3.0); // 1/3 do vetor para ter repeticao
         printf("%d ", v[i]);
     }
     printf("\n");
