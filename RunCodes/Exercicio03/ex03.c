@@ -31,6 +31,17 @@ void copy_word(int* cursor, char*** ptr_word_list, char*** ptr_word_list_copy) {
     word_list_copy[*cursor][word_length] = '\0';
 }
 
+void build_cumulate_frequency_histogram(int** ptr_keys_vector, int* key_range) {
+    int* keys_vector = *ptr_keys_vector;
+    int total = 0;
+    for (int i = 0; i < *key_range; i++) {
+        int count = keys_vector[i];
+        keys_vector[i] = total;
+        total = total + count;
+    }
+}
+
+
 void order_word_list(char*** ptr_word_list, int* N) {
     char** word_list = *ptr_word_list;
     int max, min, key;
@@ -46,17 +57,50 @@ void order_word_list(char*** ptr_word_list, int* N) {
         if (key < min) min = key;
         
         copy_word(&i, ptr_word_list, &word_list_copy);
+        printf("%s\n", word_list_copy[i]);
     }
     printf("\n");
 
+    int key_range = (max-min) + 1;
+    int* keys_vector = (int*)calloc(key_range, sizeof(int));
 
+    for (int i = 0; i < *N; i++) {
+        key = (int)word_list[i][0];
+        int key_position = key - min;
+        keys_vector[key_position]++;
+    }
+
+    build_cumulate_frequency_histogram(&keys_vector, &key_range);
+
+    for (int i = 0; i < *N; i++) {
+        key = (int)word_list_copy[i][0];
+        int word_correct_position = keys_vector[key - min];
+
+        word_list[word_correct_position] = word_list_copy[i];
+        keys_vector[key - min]++;
+    }
+
+    printf("ORDERED:\n\n");
+    for (int i = 0; i < *N; i++) {
+        printf("%s\n", word_list[i]);
+    }
+
+    printf("\n");
+    printf("%d\n\n", *N);
+
+    for (int i = 0; i < *N; i++) {
+        printf("%s\n", word_list_copy[i]);
+    }
+    free(keys_vector);
     free_word_list(&word_list_copy, N);
 }
 
-void store_word_list(FILE* file_, int* N, char*** ptr_word_list) {
+void store_word_list(FILE* file_) {
     char** word_list = NULL;
     int word_count = 0;
     char letter_ = fgetc(file_);
+
+    int N = 0;
 
     word_list = (char**)malloc(sizeof(char*));
     while (!feof(file_)) {
@@ -78,13 +122,13 @@ void store_word_list(FILE* file_, int* N, char*** ptr_word_list) {
         letter_ = fgetc(file_);
     }
     printf("\n");
-    *N = word_count; 
-    *ptr_word_list = word_list;
+    N = word_count; 
 
-    order_word_list(ptr_word_list, N);
+    order_word_list(&word_list, &N);
+    free_word_list(&word_list, &N);
 }
 
-void read_file(int* N, char*** ptr_word_list) {
+void read_file_and_create_list(void) {
     char file_name[50];
     scanf("%s", file_name);
     // char file_name[50] = "words1.txt";
@@ -95,24 +139,9 @@ void read_file(int* N, char*** ptr_word_list) {
         exit(-1);
     }
 
-    store_word_list(file_, N, ptr_word_list);
+    store_word_list(file_);
 
     fclose(file_);
-}
-
-void create_list() {
-
-}
-
-void read_file_and_create_list(void) {
-    int N = 0;
-    char** word_list = NULL;
-
-    read_file(&N, &word_list);
-
-    create_list();
-
-    free_word_list(&word_list, &N);
 }
 
 void create_update_index_vector() {

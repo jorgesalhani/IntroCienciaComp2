@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/exec",
-            "args": ["2.in"],
+            "args": ["< 1.in"],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",
             "environment": [],
