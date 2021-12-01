@@ -8,7 +8,6 @@ Titulo:     Exercicio 3: Busca Indexada com Lista Encadeada
 #include <stdio.h>
 #include <stdbool.h>
 
-#define WORD_LENGTH 100
 
 void read_command(int* end_command) {
     int command = *end_command;
@@ -18,14 +17,31 @@ void read_command(int* end_command) {
 }
 
 void store_word_list(FILE* file_, int* N, char*** ptr_word_list) {
-    char** word_list = *ptr_word_list;
+    char** word_list = NULL;
     int word_count = 0;
-    char word[WORD_LENGTH];
-    while (fgets(word, sizeof(word), file_) != NULL) {
-        word_list[word_count] = word;
+    char letter_ = fgetc(file_);
+
+    word_list = (char**)malloc(sizeof(char*));
+    while (!feof(file_)) {
+        word_list = (char**)realloc(word_list, sizeof(char*)*(word_count+1));
+
+        int cursor = 0;
+        word_list[word_count] = (char*)malloc(sizeof(char));
+        while (letter_ != '\n' && !feof(file_)) {
+            word_list[word_count] = (char*)realloc(word_list[word_count], sizeof(char)*(cursor+1));
+            word_list[word_count][cursor] = letter_;
+            letter_ = fgetc(file_);
+            cursor++;
+        }
+        word_list[word_count] = (char*)realloc(word_list[word_count], sizeof(char)*(cursor+1));
+        word_list[word_count][cursor] = '\0';
+
+        printf("%s\n", word_list[word_count]);
         word_count++;
+        letter_ = fgetc(file_);
     }
-    *N = word_count; // TODO: FIX
+    *N = word_count; 
+    *ptr_word_list = word_list;
 }
 
 void read_file(int* N, char*** ptr_word_list) {
@@ -59,9 +75,12 @@ void free_word_list(char*** ptr_to_word_list, int* N) {
 void read_file_and_create_list(void) {
     int N = 0;
     char** word_list = NULL;
-    word_list = (char**)malloc(sizeof(char*));
 
     read_file(&N, &word_list);
+
+    for(int i = 0; i < N; i++) {
+        printf("%s\n", word_list[i]);
+    }
 
     create_list();
 
