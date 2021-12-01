@@ -46,8 +46,8 @@ void order_word_list(char*** ptr_word_list, int* N) {
         if (key < min) min = key;
         
         copy_word(&i, ptr_word_list, &word_list_copy);
-        printf("%s\n", word_list_copy[i]);
     }
+    printf("\n");
 
 
     free_word_list(&word_list_copy, N);
