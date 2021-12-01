@@ -8,13 +8,8 @@ Titulo:     Exercicio 3: Busca Indexada com Lista Encadeada
 #include <stdio.h>
 #include <stdbool.h>
 
-
-void read_command(int* end_command) {
-    int command = *end_command;
-    // scanf("%d ", &command);
-    command = 1;
-    *end_command = command;
-}
+#define WORD_MAX_LENGTH 100
+#define DEBUG 1
 
 void store_word_list(FILE* file_, int* N, char*** ptr_word_list) {
     char** word_list = NULL;
@@ -45,9 +40,9 @@ void store_word_list(FILE* file_, int* N, char*** ptr_word_list) {
 }
 
 void read_file(int* N, char*** ptr_word_list) {
-    // char file_name[50];
-    // scanf("%s", file_name);
-    char file_name[50] = "words1.txt";
+    char file_name[50];
+    scanf("%s", file_name);
+    // char file_name[50] = "words1.txt";
 
     FILE* file_ = fopen(file_name, "r");
     if (file_ == NULL) {
@@ -73,6 +68,7 @@ void free_word_list(char*** ptr_to_word_list, int* N) {
 }
 
 void read_file_and_create_list(void) {
+    if (DEBUG) printf("COMMAND 1:\n");
     int N = 0;
     char** word_list = NULL;
 
@@ -88,10 +84,18 @@ void read_file_and_create_list(void) {
 }
 
 void create_update_index_vector() {
+    if (DEBUG) printf("COMMAND 2:\n");
+}
 
+void read_query_word(void) {
+    char word_query[WORD_MAX_LENGTH];
+    scanf("%s ", word_query);
+    printf("%s\n", word_query);
 }
 
 void search() {
+    if (DEBUG) printf("COMMAND 3:\n");
+    read_query_word();
     
 }
 
@@ -102,14 +106,33 @@ void process_command(int* command) {
 
     if (*command == 3) search();
 
+    if (*command == 0) exit(1);
+}
+
+void read_command(int* end_command) {
+    int command = *end_command;
+    scanf("%d ", &command);
+    // command = 1;
+    *end_command = command;
+}
+
+
+void process_all_commands(void) {
+    int command = 0;
+    while (!feof(stdin)) {
+        read_command(&command);
+        process_command(&command);
+    }
 }
 
 int main(void) {
 
-    int command = 0;
-    read_command(&command);
+    process_all_commands();
 
-    process_command(&command);
+    // int command = 0;
+    // read_command(&command);
+
+    // process_command(&command);
 
 
     return 0;
