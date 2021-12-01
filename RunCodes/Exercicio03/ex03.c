@@ -119,11 +119,9 @@ void store_word_list(FILE* file_) {
         word_list[word_count] = (char*)realloc(word_list[word_count], sizeof(char)*(cursor+1));
         word_list[word_count][cursor] = '\0';
 
-        printf("%s\n", word_list[word_count]);
         word_count++;
         letter_ = fgetc(file_);
     }
-    printf("\n");
     N = word_count; 
 
     order_word_list(&word_list, &N);
@@ -152,7 +150,6 @@ void create_update_index_vector() {
 void read_query_word(void) {
     char word_query[WORD_MAX_LENGTH];
     scanf("%s ", word_query);
-    printf("%s\n", word_query);
 }
 
 void search() {
