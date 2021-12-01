@@ -7,9 +7,51 @@ Titulo:     Exercicio 3: Busca Indexada com Lista Encadeada
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define WORD_MAX_LENGTH 100
-#define DEBUG 1
+
+void free_word_list(char*** ptr_to_word_list, int* N) {
+    char** word_list = *ptr_to_word_list;
+    for (int i = 0; i < *N; i++) {
+        free(word_list[i]);
+    }
+    free(word_list);
+}
+
+void copy_word(int* cursor, char*** ptr_word_list, char*** ptr_word_list_copy) {
+    char** word_list = *ptr_word_list;
+    char** word_list_copy = *ptr_word_list_copy;
+
+    int word_length = strlen(word_list[*cursor]);
+    word_list_copy[*cursor] = (char*)malloc(sizeof(char*)*(word_length+1));
+    for (int i = 0; i < word_length; i++) {
+        word_list_copy[*cursor][i] = word_list[*cursor][i];
+    }
+    word_list_copy[*cursor][word_length] = '\0';
+}
+
+void order_word_list(char*** ptr_word_list, int* N) {
+    char** word_list = *ptr_word_list;
+    int max, min, key;
+
+    char** word_list_copy = NULL;
+    word_list_copy = (char**)malloc(sizeof(char*)*(*N));
+    printf("COPY:\n\n");
+
+    max = min = (int)word_list[0][0];
+    for (int i = 0; i < *N; i++) {
+        key = (int)word_list[i][0];
+        if (key > max) max = key;
+        if (key < min) min = key;
+        
+        copy_word(&i, ptr_word_list, &word_list_copy);
+        printf("%s\n", word_list_copy[i]);
+    }
+
+
+    free_word_list(&word_list_copy, N);
+}
 
 void store_word_list(FILE* file_, int* N, char*** ptr_word_list) {
     char** word_list = NULL;
@@ -35,8 +77,11 @@ void store_word_list(FILE* file_, int* N, char*** ptr_word_list) {
         word_count++;
         letter_ = fgetc(file_);
     }
+    printf("\n");
     *N = word_count; 
     *ptr_word_list = word_list;
+
+    order_word_list(ptr_word_list, N);
 }
 
 void read_file(int* N, char*** ptr_word_list) {
@@ -59,24 +104,11 @@ void create_list() {
 
 }
 
-void free_word_list(char*** ptr_to_word_list, int* N) {
-    char** word_list = *ptr_to_word_list;
-    for (int i = 0; i < *N; i++) {
-        free(word_list[i]);
-    }
-    free(word_list);
-}
-
 void read_file_and_create_list(void) {
-    if (DEBUG) printf("COMMAND 1:\n");
     int N = 0;
     char** word_list = NULL;
 
     read_file(&N, &word_list);
-
-    for(int i = 0; i < N; i++) {
-        printf("%s\n", word_list[i]);
-    }
 
     create_list();
 
@@ -84,7 +116,6 @@ void read_file_and_create_list(void) {
 }
 
 void create_update_index_vector() {
-    if (DEBUG) printf("COMMAND 2:\n");
 }
 
 void read_query_word(void) {
@@ -94,7 +125,6 @@ void read_query_word(void) {
 }
 
 void search() {
-    if (DEBUG) printf("COMMAND 3:\n");
     read_query_word();
     
 }
@@ -126,14 +156,7 @@ void process_all_commands(void) {
 }
 
 int main(void) {
-
     process_all_commands();
-
-    // int command = 0;
-    // read_command(&command);
-
-    // process_command(&command);
-
 
     return 0;
 }
