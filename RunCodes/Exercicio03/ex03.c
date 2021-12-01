@@ -48,7 +48,6 @@ void order_word_list(char*** ptr_word_list, int* N) {
 
     char** word_list_copy = NULL;
     word_list_copy = (char**)malloc(sizeof(char*)*(*N));
-    printf("COPY:\n\n");
 
     max = min = (int)word_list[0][0];
     for (int i = 0; i < *N; i++) {
@@ -57,9 +56,7 @@ void order_word_list(char*** ptr_word_list, int* N) {
         if (key < min) min = key;
         
         copy_word(&i, ptr_word_list, &word_list_copy);
-        printf("%s\n", word_list_copy[i]);
     }
-    printf("\n");
 
     int key_range = (max-min) + 1;
     int* keys_vector = (int*)calloc(key_range, sizeof(int));
@@ -70,15 +67,20 @@ void order_word_list(char*** ptr_word_list, int* N) {
         keys_vector[key_position]++;
     }
 
+    char** ordered_word_list = (char**)malloc(sizeof(char*)*(*N));
+    for (int i = 0; i < *N; i++) {
+        ordered_word_list[i] = (char*)malloc(sizeof(char)*(WORD_MAX_LENGTH));
+    }
+
     build_cumulate_frequency_histogram(&keys_vector, &key_range);
 
-    for (int i = 0; i < *N; i++) {
-        key = (int)word_list_copy[i][0];
-        int word_correct_position = keys_vector[key - min];
+    // for (int i = 0; i < *N; i++) {
+    //     key = (int)word_list_copy[i][0];
+    //     int word_correct_position = keys_vector[key - min];
 
-        word_list[word_correct_position] = word_list_copy[i];
-        keys_vector[key - min]++;
-    }
+    //     word_list[word_correct_position] = word_list_copy[i];
+    //     keys_vector[key - min]++;
+    // }
 
     printf("ORDERED:\n\n");
     for (int i = 0; i < *N; i++) {
@@ -86,11 +88,7 @@ void order_word_list(char*** ptr_word_list, int* N) {
     }
 
     printf("\n");
-    printf("%d\n\n", *N);
-
-    for (int i = 0; i < *N; i++) {
-        printf("%s\n", word_list_copy[i]);
-    }
+    free_word_list(&ordered_word_list, N);
     free(keys_vector);
     free_word_list(&word_list_copy, N);
 }
