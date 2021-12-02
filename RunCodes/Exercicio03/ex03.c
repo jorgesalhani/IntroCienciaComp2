@@ -41,7 +41,6 @@ void build_cumulate_frequency_histogram(int** ptr_keys_vector, int* key_range) {
     }
 }
 
-
 void order_word_list(char*** ptr_word_list, int* N) {
     char** word_list = *ptr_word_list;
     int max, min, key;
@@ -74,7 +73,7 @@ void order_word_list(char*** ptr_word_list, int* N) {
 
     build_cumulate_frequency_histogram(&keys_vector, &key_range);
 
-    for (int i = 0; i < *N; i++) {
+    for (int i = *N-1; i >= 0; i--) {
         key = (int)word_list_copy[i][0];
         int word_correct_position = keys_vector[key - min];
 
@@ -86,7 +85,7 @@ void order_word_list(char*** ptr_word_list, int* N) {
         keys_vector[key - min]++;
     }
 
-    printf("ORDERED:\n\n");
+
     for (int i = 0; i < *N; i++) {
         printf("%s\n", ordered_word_list[i]);
     }
