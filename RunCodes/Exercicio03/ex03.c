@@ -15,7 +15,7 @@ Titulo:     Exercicio 3: Busca Indexada com Lista Encadeada
 typedef struct index_vector
 {
     char letter;
-    char* word;
+    char** word_block;
 } IndexVector;
 
 
@@ -148,28 +148,37 @@ char** read_file_and_create_list(int* N) {
     return ordered_word_list;
 }
 
-char* get_first_word(char*** ptr_ordered_word_list, char letter, int* N, int* non_empty_indexes) {
+char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* non_empty_indexes) {
     char** ordered_word_list = *ptr_ordered_word_list;
 
-    int count = 0;
-    char* word = ordered_word_list[count];
-    bool found_word = false;
-    while (count < *N && !found_word) {
-        word = ordered_word_list[count];
-        if (word[0] == letter) found_word = true;
-        count++;
+    char** block_words = (char**)malloc(sizeof(char*));
+
+    int i = 0;
+    for (i = 0; i < *N; i++) {
+        int count = 0;
+        int j = i;
+        while (j < *N && ordered_word_list[j][0] == letter) {
+            printf("%s\n", ordered_word_list[j]);
+            block_words[count] = (char*)malloc(sizeof(char)*(WORD_MAX_LENGTH));
+            block_words[count] = ordered_word_list[j];
+            block_words = (char**)realloc(block_words, sizeof(char**)*(count+1));
+            count++;
+            j++;
+        }
+        *non_empty_indexes = count-1;
+        if (count > 0) {
+            block_words[count] = (char*)malloc(sizeof(char));
+            block_words[count] = "@";
+            break;
+        }
     }
 
-    if (!found_word) {
-        word = "";
-    } else {
-        int index_count = *non_empty_indexes;
-        index_count++;
-        *non_empty_indexes = index_count;
+    if (i == *N) {
+        free(block_words);
+        block_words = NULL;
     }
 
-
-    return word;
+    return block_words;
 }
 
 IndexVector* create_update_index_vector(char*** ptr_ordered_word_list, int* N, int* non_empty_indexes) {
@@ -182,11 +191,19 @@ IndexVector* create_update_index_vector(char*** ptr_ordered_word_list, int* N, i
     for (int i = 0; i < ALPHABET_LETTERS; i++) {
         index_vector[i].letter = letter_;
 
-        char* word = get_first_word(ptr_ordered_word_list, letter_, N, non_empty_indexes);
-        index_vector[i].word = word;
+        char** word_block_list = get_block_words(ptr_ordered_word_list, letter_, N, non_empty_indexes);
+        index_vector[i].word_block = word_block_list;
         letter_++;
 
-        printf("(%c, %s) ", index_vector[i].letter, index_vector[i].word);
+        if (word_block_list != NULL) {
+            int j = 0;
+            char* word = word_block_list[j];
+            while (word != "@") {
+                printf("(%c, %s)", index_vector[i].letter, (index_vector[i].word_block)[j]);
+                word = word_block_list[j++];
+            }
+            printf("\n");
+        }
     }
     printf("\n");
 
@@ -206,15 +223,17 @@ void search(IndexVector** ptr_index_vector, char*** ptr_ordered_word_list, int* 
     scanf("%s", query_word);
 
     char key = query_word[0];
+    printf("QUERY: %s\n", query_word);
 
     int i = 0;
     for (i = 0; i < ALPHABET_LETTERS; i++) {
         char letter = index_vector[i].letter;
         if (letter == key) break;
     }
+    printf("INDEX i: %d\n\n", i);
 
     for (int k = 0; k < *N; k++) {
-        if (strcmp(ordered_word_list[k], index_vector[k].word) == 0) {
+        if (strcmp(ordered_word_list[k], index_vector[i].word_block[0]) == 0) {
             char cursor_letter = key;
             int j = k;
             while (strcmp(ordered_word_list[j], query_word) != 0) {
@@ -232,7 +251,7 @@ void search(IndexVector** ptr_index_vector, char*** ptr_ordered_word_list, int* 
     }
 
 
-    printf("(%c, %s) ", index_vector[i].letter, index_vector[i].word);
+    printf("(%c, %s) ", index_vector[i].letter, (index_vector[i].word_block)[0]);
 }
 
 void read_command(int* end_command) {
@@ -270,7 +289,7 @@ void process_all_commands(void) {
                 printf("%d\n", non_empty_indexes);
             } else {
                 if (command == 3) {
-                    search(&index_vector, &ordered_word_list, &N, &non_empty_indexes);
+                    // search(&index_vector, &ordered_word_list, &N, &non_empty_indexes);
                 }
             }
         }
