@@ -132,7 +132,7 @@ char** store_word_list(FILE* file_, int* N) {
 
 char** read_file_and_create_list(int* N) {
     char file_name[50];
-    scanf("%s", file_name);
+    scanf("%s ", file_name);
     // char file_name[50] = "words1.txt";
 
     FILE* file_ = fopen(file_name, "r");
@@ -150,6 +150,7 @@ char** read_file_and_create_list(int* N) {
 
 char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* non_empty_indexes) {
     char** ordered_word_list = *ptr_ordered_word_list;
+    int non_empty_indexes_ = *non_empty_indexes;
 
     char** block_words = (char**)malloc(sizeof(char*));
 
@@ -157,16 +158,20 @@ char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* 
     for (i = 0; i < *N; i++) {
         int count = 0;
         int j = i;
+
         while (j < *N && ordered_word_list[j][0] == letter) {
             printf("%s\n", ordered_word_list[j]);
             block_words[count] = (char*)malloc(sizeof(char)*(WORD_MAX_LENGTH));
             block_words[count] = ordered_word_list[j];
-            block_words = (char**)realloc(block_words, sizeof(char**)*(count+1));
             count++;
+            block_words = (char**)realloc(block_words, sizeof(char**)*(count+1));
             j++;
         }
-        *non_empty_indexes = count-1;
+        non_empty_indexes_ = count-1;
+        *non_empty_indexes = non_empty_indexes_;
+
         if (count > 0) {
+            block_words = (char**)realloc(block_words, sizeof(char**)*(count+1));
             block_words[count] = (char*)malloc(sizeof(char));
             block_words[count] = "@";
             break;
@@ -205,7 +210,17 @@ IndexVector* create_update_index_vector(char*** ptr_ordered_word_list, int* N, i
             printf("\n");
         }
     }
-    printf("\n");
+    
+    for (int i = 0; i < ALPHABET_LETTERS; i++) {
+        if (index_vector[i].word_block != NULL) {
+            int j = 0;
+            char* words = index_vector[i].word_block[j];
+            while (words != "@") {
+                printf("%s\n", (index_vector[i].word_block[j]));
+                words = index_vector[i].word_block[j++];
+            }
+        }
+    }
 
     return index_vector;
 }
@@ -289,6 +304,9 @@ void process_all_commands(void) {
                 printf("%d\n", non_empty_indexes);
             } else {
                 if (command == 3) {
+                    char query_word[WORD_MAX_LENGTH];
+                    scanf("%s", query_word);
+
                     // search(&index_vector, &ordered_word_list, &N, &non_empty_indexes);
                 }
             }
@@ -296,6 +314,17 @@ void process_all_commands(void) {
 
         if (command == 0) {
             free_word_list(&ordered_word_list, &N);
+            for (int i = 0; i < ALPHABET_LETTERS; i++) {
+                if (index_vector[i].word_block != NULL) {
+                    int j = 0;
+                    char* words = index_vector[i].word_block[j];
+                    while (words != "@") {
+                        j++;
+                    }
+                    j++;
+                    free_word_list(&index_vector[i].word_block, &j);
+                }
+            }
             free(index_vector);
 
             exit(1);
