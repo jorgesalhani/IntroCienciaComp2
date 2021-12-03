@@ -10,6 +10,14 @@ Titulo:     Exercicio 3: Busca Indexada com Lista Encadeada
 #include <string.h>
 
 #define WORD_MAX_LENGTH 100
+#define ALPHABET_LETTERS 26
+
+typedef struct index_vector
+{
+    char letter;
+    char* word;
+} IndexVector;
+
 
 void free_word_list(char*** ptr_to_word_list, int* N) {
     char** word_list = *ptr_to_word_list;
@@ -140,7 +148,49 @@ char** read_file_and_create_list(int* N) {
     return ordered_word_list;
 }
 
-void create_update_index_vector() {
+char* get_first_word(char*** ptr_ordered_word_list, char letter, int* N, int* non_empty_indexes) {
+    char** ordered_word_list = *ptr_ordered_word_list;
+
+    int count = 0;
+    char* word = ordered_word_list[count];
+    bool found_word = false;
+    while (count < *N && !found_word) {
+        word = ordered_word_list[count];
+        if (word[0] == letter) found_word = true;
+        count++;
+    }
+
+    if (!found_word) {
+        word = "";
+    } else {
+        int index_count = *non_empty_indexes;
+        index_count++;
+        *non_empty_indexes = index_count;
+    }
+
+
+    return word;
+}
+
+void create_update_index_vector(char*** ptr_ordered_word_list, int* N, int* non_empty_indexes) {
+    char** ordered_word_list = *ptr_ordered_word_list;
+
+    IndexVector* index_vector = NULL;
+    index_vector = (IndexVector*)malloc(sizeof(IndexVector)*ALPHABET_LETTERS);
+
+    char letter_ = 'a';
+    for (int i = 0; i < ALPHABET_LETTERS; i++) {
+        index_vector[i].letter = letter_;
+
+        char* word = get_first_word(ptr_ordered_word_list, letter_, N, non_empty_indexes);
+        index_vector[i].word = word;
+        letter_++;
+
+        // printf("(%c, %s)\n", index_vector[i].letter, index_vector[i].word);
+    }
+    // printf("\n");
+
+    free(index_vector);
 }
 
 void read_query_word(void) {
@@ -173,6 +223,7 @@ void process_all_commands(void) {
 
     char** ordered_word_list = NULL;
     int N = 0;
+    int non_empty_indexes = 0;
 
     while (!feof(stdin)) {
         read_command(&command);
@@ -180,14 +231,15 @@ void process_all_commands(void) {
         if (command == 1) {
             ordered_word_list = read_file_and_create_list(&N);
             print_three_first_words(&ordered_word_list);
-        }
-
-        if (command == 2) {
-            create_update_index_vector();
-        }
-
-        if (command == 3) {
-            search();
+        } else {
+            if (command == 2) {
+                create_update_index_vector(&ordered_word_list, &N, &non_empty_indexes);
+                printf("%d\n", non_empty_indexes);
+            } else {
+                if (command == 3) {
+                    search();
+                }
+            }
         }
 
         if (command == 0) {
