@@ -41,7 +41,7 @@ void build_cumulate_frequency_histogram(int** ptr_keys_vector, int* key_range) {
     }
 }
 
-void order_word_list(char*** ptr_word_list, int* N) {
+char** order_word_list(char*** ptr_word_list, int* N) {
     char** word_list = *ptr_word_list;
     int max, min, key;
 
@@ -84,24 +84,17 @@ void order_word_list(char*** ptr_word_list, int* N) {
 
         keys_vector[key - min]++;
     }
-
-
-    for (int i = 0; i < *N; i++) {
-        printf("%s\n", ordered_word_list[i]);
-    }
-
-    printf("\n");
-    free_word_list(&ordered_word_list, N);
     free(keys_vector);
     free_word_list(&word_list_copy, N);
+
+    return ordered_word_list;
 }
 
-void store_word_list(FILE* file_) {
+char** store_word_list(FILE* file_, int* N) {
     char** word_list = NULL;
     int word_count = 0;
     char letter_ = fgetc(file_);
 
-    int N = 0;
 
     word_list = (char**)malloc(sizeof(char*));
     while (!feof(file_)) {
@@ -121,13 +114,15 @@ void store_word_list(FILE* file_) {
         word_count++;
         letter_ = fgetc(file_);
     }
-    N = word_count; 
+    *N = word_count; 
 
-    order_word_list(&word_list, &N);
-    free_word_list(&word_list, &N);
+    char** ordered_word_list = NULL;
+    ordered_word_list = order_word_list(&word_list, N);
+    free_word_list(&word_list, N);
+    return ordered_word_list;
 }
 
-void read_file_and_create_list(void) {
+char** read_file_and_create_list(int* N) {
     char file_name[50];
     scanf("%s", file_name);
     // char file_name[50] = "words1.txt";
@@ -138,9 +133,11 @@ void read_file_and_create_list(void) {
         exit(-1);
     }
 
-    store_word_list(file_);
+    char** ordered_word_list = NULL;
+    ordered_word_list = store_word_list(file_, N);
 
     fclose(file_);
+    return ordered_word_list;
 }
 
 void create_update_index_vector() {
@@ -156,16 +153,6 @@ void search() {
     
 }
 
-void process_command(int* command) {
-    if (*command == 1) read_file_and_create_list();
-
-    if (*command == 2) create_update_index_vector();
-
-    if (*command == 3) search();
-
-    if (*command == 0) exit(1);
-}
-
 void read_command(int* end_command) {
     int command = *end_command;
     scanf("%d ", &command);
@@ -173,12 +160,41 @@ void read_command(int* end_command) {
     *end_command = command;
 }
 
+void print_three_first_words(char*** ptr_ordered_word_list) {
+    char** word_list = *ptr_ordered_word_list;
+    for (int i = 0; i < 3; i++) {
+        printf("%s\n", word_list[i]);
+    }
+}
+
 
 void process_all_commands(void) {
     int command = 0;
+
+    char** ordered_word_list = NULL;
+    int N = 0;
+
     while (!feof(stdin)) {
         read_command(&command);
-        process_command(&command);
+
+        if (command == 1) {
+            ordered_word_list = read_file_and_create_list(&N);
+            print_three_first_words(&ordered_word_list);
+        }
+
+        if (command == 2) {
+            create_update_index_vector();
+        }
+
+        if (command == 3) {
+            search();
+        }
+
+        if (command == 0) {
+            free_word_list(&ordered_word_list, &N);
+
+            exit(1);
+        }
     }
 }
 
