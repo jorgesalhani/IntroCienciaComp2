@@ -208,17 +208,7 @@ IndexVector* create_update_index_vector(char*** ptr_ordered_word_list, int* N, i
                 word = word_block_list[j++];
             }
             // printf("\n");
-        }
-    }
-    
-    for (int i = 0; i < ALPHABET_LETTERS; i++) {
-        if (index_vector[i].word_block != NULL) {
-            int j = 0;
-            char* words = index_vector[i].word_block[j];
-            while (words != "@") {
-                // printf("%s\n", (index_vector[i].word_block[j]));
-                words = index_vector[i].word_block[j++];
-            }
+            // free(word_block_list);
         }
     }
 
@@ -238,35 +228,42 @@ void search(IndexVector** ptr_index_vector, char*** ptr_ordered_word_list, int* 
     scanf("%s", query_word);
 
     char key = query_word[0];
-    printf("QUERY: %s\n", query_word);
+    // printf("QUERY: %s\n", query_word);
 
     int i = 0;
     for (i = 0; i < ALPHABET_LETTERS; i++) {
         char letter = index_vector[i].letter;
         if (letter == key) break;
     }
-    printf("INDEX i: %d\n\n", i);
+    // printf("INDEX i: %d\n\n", i);
 
-    for (int k = 0; k < *N; k++) {
-        if (strcmp(ordered_word_list[k], index_vector[i].word_block[0]) == 0) {
-            char cursor_letter = key;
-            int j = k;
-            while (strcmp(ordered_word_list[j], query_word) != 0) {
-                cursor_letter = ordered_word_list[j++][0];
-                if (cursor_letter != key) {
-                    printf("Palavra nao existe na lista.\n");
-                    break;
+    if (index_vector[i].word_block == NULL) {
+            printf("Palavra nao existe na lista.\n");
+    } else {
+        for (int k = 0; k < *N; k++) {
+            // printf("%s %s\n", ordered_word_list[k], index_vector[i].word_block[0]);
+            if (strcmp(ordered_word_list[k], index_vector[i].word_block[0]) == 0) {
+                int l = 0;
+                char cursor_letter = key;
+                int j = k;
+                while (strcmp(ordered_word_list[j], query_word) != 0) {
+                    cursor_letter = ordered_word_list[j++][0];
+                    if (cursor_letter != key) {
+                        printf("Palavra nao existe na lista.\n");
+                        break;
+                    }
+                    l++;
                 }
+                if (strcmp(ordered_word_list[j], query_word) == 0) {
+                    printf("%d\n", l);
+                }
+                break;
             }
-            if (strcmp(ordered_word_list[j], query_word) == 0) {
-                printf("%d\n", i);
-            }
-            break;
+            // printf("%s\n", index_vector[i].word_block[0]);
         }
     }
 
-
-    printf("(%c, %s) ", index_vector[i].letter, (index_vector[i].word_block)[0]);
+    // printf("(%c, %s) ", index_vector[i].letter, (index_vector[i].word_block)[0]);
 }
 
 void read_command(int* end_command) {
@@ -304,10 +301,10 @@ void process_all_commands(void) {
                 printf("%d\n", non_empty_indexes);
             } else {
                 if (command == 3) {
-                    char query_word[WORD_MAX_LENGTH];
-                    scanf("%s", query_word);
+                    // char query_word[WORD_MAX_LENGTH];
+                    // scanf("%s", query_word);
 
-                    // search(&index_vector, &ordered_word_list, &N, &non_empty_indexes);
+                    search(&index_vector, &ordered_word_list, &N, &non_empty_indexes);
                 }
             }
         }
@@ -318,22 +315,29 @@ void process_all_commands(void) {
                     int j = 0;
                     char* words = index_vector[i].word_block[j];
                     while (words != "@") {
-                        printf("%p\t%s\n", &(index_vector[i].word_block[j]), (index_vector[i].word_block[j]));
-                        // free(index_vector[i].word_block[j]);
+                    //     printf("%p\t%s\n", &(index_vector[i].word_block[j]), (index_vector[i].word_block[j]));
+                    //     // free(index_vector[i].word_block[j]);
                         words = index_vector[i].word_block[j++];
                     }
+                    // printf("aAAA\n");
+                    // printf("%p\t%s\n", &(index_vector[i].word_block[j-1]), (index_vector[i].word_block[j-1]));
+                    // free(index_vector[i].word_block[0]);
+                    // printf("aaa\n");
 
-                    j--;
+                    // j--;
                     // while (j >= 0) {
                     //     printf("%p\t%s\n", &(index_vector[i].word_block[j]), (index_vector[i].word_block[j]));
                     //     free(index_vector[i].word_block[j]);
                     //     j--;
                     // }
                     // free_word_list(&index_vector[i].word_block, &j);
+                    // printf("%p\n", index_vector[i].word_block);
                     free(index_vector[i].word_block);
                 }
             }
+            // printf("%d\n", N);
             free_word_list(&ordered_word_list, &N);
+            // printf("AAAA\n");
             free(index_vector);
 
             exit(1);
