@@ -256,7 +256,7 @@ void search(IndexVector** ptr_index_vector, char*** ptr_ordered_word_list, int* 
                     }
                     l++;
                 }
-                printf("%d \n", l);
+                printf("%d\n", l);
                 // printf("\n\n%s %s\n\n", ordered_word_list[j], query_word);
                 // if (strcmp(ordered_word_list[j], query_word) == 0) {
                 //     printf("%d\n", l);
@@ -354,3 +354,4 @@ int main(void) {
 
     return 0;
 }
+
