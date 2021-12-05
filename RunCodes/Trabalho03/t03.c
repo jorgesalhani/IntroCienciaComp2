@@ -8,6 +8,9 @@ Titulo:     Trabalho 03: Escalonador de processos
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define COLUMNS 4
+#define PROCESS_MAX_PRIORITY 4
+
 int** store_list(int* N) {
     int** process_list = NULL;
     process_list = malloc(sizeof(int*));
@@ -17,17 +20,17 @@ int** store_list(int* N) {
     line_cursor = 0;
     column_cursor = 0;
 
-    process_list[0] = malloc(sizeof(int)*4);
+    process_list[0] = malloc(sizeof(int)*COLUMNS);
 
     while (!feof(stdin)) {
         fscanf(stdin, "%d", &file_item);
         process_list[line_cursor][column_cursor] = file_item;
 
-        column_cursor = (column_cursor + 1) % 4;
+        column_cursor = (column_cursor + 1) % COLUMNS;
         if (column_cursor == 0 && !feof(stdin)) {
             line_cursor++;
             process_list = realloc(process_list, sizeof(int*)*(line_cursor+1));
-            process_list[line_cursor] = malloc(sizeof(int)*4);
+            process_list[line_cursor] = malloc(sizeof(int)*COLUMNS);
         }
     }
 
@@ -45,7 +48,7 @@ void free_matrix(int** process_list, int* N) {
 
 void print_process_list(int** process_list, int* N) {
     for (int i = 0; i < *N; i++) {
-        for (int j = 0; j < 4; j++) {
+        for (int j = 0; j < COLUMNS; j++) {
             printf("%d ", process_list[i][j]);
         }
         printf("\n");
@@ -71,15 +74,51 @@ void made_code_unique_recursively(int*** ptr_process_list, int* N, bool changes_
     }
 }
 
+int* build_histogram_by_priority(int ***ptr_process_list, int *N) {
+    int **process_list = *ptr_process_list;
+
+    int *histogram_vector = NULL;
+    histogram_vector = (int*)calloc(PROCESS_MAX_PRIORITY, sizeof(int));
+
+    for (int i = 0; i < *N; i++) {
+        int priority = process_list[i][3];
+        histogram_vector[priority-1]++;
+    }
+
+    return histogram_vector;
+}
+
+int** order_by_priority(int*** ptr_process_list, int* N) {
+    int** process_list = *ptr_process_list;
+    int** ordered_list = NULL;
+    ordered_list = (int**)malloc(sizeof(int*)*(*N));
+    for (int i = 0; i < *N; i++) ordered_list[i] = (int*)calloc(COLUMNS, sizeof(int));
+
+    int* histogram_vector = build_histogram_by_priority(ptr_process_list, N);
+
+    // for (int i = 0; i < *N; i++) {
+    //     for (int j = 0; j < histogram_vector[])
+    // }
+    // printf("\n\n");
+
+    free(histogram_vector);
+
+    return ordered_list;
+}
+
 void select_scheduler_algorithm(int*** ptr_process_list, int* N, int* total_processes) {
     int** process_list = *ptr_process_list;
 
     printf("ORIGINAL:\n");
-    print_process_list(process_list, N);
+    print_process_list(process_list, total_processes);
     printf("\n");
+
+    int **ordered_by_priority = order_by_priority(ptr_process_list, N);
 
     int process_i = 0;
     int total_time = 1;
+
+    free_matrix(ordered_by_priority, total_processes);
 
 }
 
