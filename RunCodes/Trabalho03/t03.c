@@ -71,114 +71,59 @@ void made_code_unique_recursively(int*** ptr_process_list, int* N, bool changes_
     }
 }
 
-void round_robin(int*** ptr_process_list, int* N, int* init_process) {
+void select_scheduler_algorithm(int*** ptr_process_list, int* N, int* total_processes) {
     int** process_list = *ptr_process_list;
 
-    int time_quantum = 1;
+    printf("ORIGINAL:\n");
+    print_process_list(process_list, N);
+    printf("\n");
 
-    int total = 0, x, counter = 0;
-    int wait_time = 0, turnaround_time = 0;
-    int process_index, time_recognized, time_execution, priority;
-    int total_time = 0;
+    int process_i = 0;
+    int total_time = 1;
 
-    int total_process = *N;
-    int i = 0;
-    while (total_process != 0) {
-        process_index = process_list[i][0];
-        time_recognized = process_list[i][1];
-        time_execution = process_list[i][2];
-        priority = process_list[i][3];
-
-        if (time_recognized <= time_quantum && time_recognized > 0) {
-            total_time = total_time + time_recognized;
-            time_recognized = 0;
-            counter = 1;
-        }
-
-        if (time_recognized > 0) {
-            time_recognized = time_recognized - time_quantum;
-            total_time = total_time + time_quantum;
-        }
-
-        if (time_recognized == 0 && counter == 1) {
-            printf("\nProcess[%d]\t\t%d\t\t%d\t\t\t%d", i + 1, time_execution, total_time - time_recognized, total_time - time_recognized - time_execution);
-
-            wait_time = wait_time + total_time - time_recognized - time_execution;
-            turnaround_time = turnaround_time + total_time - time_recognized;
-            counter = 0;
-            total_process--;
-        }
-
-        if (i == *N - 1) {
-            i = 0;
-        } else if (process_list[i+1][1] <= total_time) {
-            i++;
-        } else {
-            i = 0;
-        }
-    }
-}
-
-void select_scheduler_algorithm(int*** ptr_process_list, int* N, int process_priority_i, int process_priority_j) {
-    int init_process;
-    if (process_priority_i == process_priority_j) {
-        init_process = 0;
-        round_robin(ptr_process_list, N, &init_process);
-    }
-
-    if (process_priority_i > process_priority_j) {
-        init_process = 1;
-        round_robin(ptr_process_list, N, &init_process);
-    }
 }
 
 
-void process_by_scheduler_algorithm(int*** ptr_process_list, int* N) {
+void process_by_scheduler_algorithm(int*** ptr_process_list, int* N, int* total_processes) {
     int** process_list = *ptr_process_list;
-
-    for (int i = 0; i < *N; i++) {
-        for (int j = 0; j < *N; j++) {
-            if (i != j) {
-                select_scheduler_algorithm(ptr_process_list, N, process_list[i][3], process_list[j][3]);
-            }
-        }
-    }
+    select_scheduler_algorithm(ptr_process_list, N, total_processes);
 
 }
 
 int main(void) {
-    // int** process_list = NULL;
-    int N = 4;
+    int** process_list = NULL;
+    int N = 0;
 
-    // process_list = store_list(&N);
+    process_list = store_list(&N);
 
-    int** process_list = malloc(sizeof(int*)*4);
-    for (int i = 0; i < 4; i++) {
-        process_list[i] = calloc(4, sizeof(int));
-    }
-    process_list[0][0] = 333;
-    process_list[0][1] = 1;
-    process_list[0][2] = 5;
-    process_list[0][3] = 4;
-    process_list[1][0] = 1571;
-    process_list[1][1] = 1;
-    process_list[1][2] = 3;
-    process_list[1][3] = 3;
-    process_list[2][0] = 1571;
-    process_list[2][1] = 2;
-    process_list[2][2] = 1;
-    process_list[2][3] = 2;
-    process_list[3][0] = 227;
-    process_list[3][1] = 5;
-    process_list[3][2] = 2;
-    process_list[3][3] = 1;
+    // int** process_list = malloc(sizeof(int*)*4);
+    // for (int i = 0; i < 4; i++) {
+    //     process_list[i] = calloc(4, sizeof(int));
+    // }
+    // process_list[0][0] = 333;
+    // process_list[0][1] = 1;
+    // process_list[0][2] = 5;
+    // process_list[0][3] = 4;
+    // process_list[1][0] = 1571;
+    // process_list[1][1] = 1;
+    // process_list[1][2] = 3;
+    // process_list[1][3] = 3;
+    // process_list[2][0] = 1571;
+    // process_list[2][1] = 2;
+    // process_list[2][2] = 1;
+    // process_list[2][3] = 2;
+    // process_list[3][0] = 227;
+    // process_list[3][1] = 5;
+    // process_list[3][2] = 2;
+    // process_list[3][3] = 1;
 
     made_code_unique_recursively(&process_list, &N, true);
 
-    process_by_scheduler_algorithm(&process_list, &N);
+    int total_processes = N;
+    process_by_scheduler_algorithm(&process_list, &N, &total_processes);
 
-    print_process_list(process_list, &N);
+    print_process_list(process_list, &total_processes);
 
-    free_matrix(process_list, &N);
+    free_matrix(process_list, &total_processes);
     return 0;
 }
