@@ -99,8 +99,8 @@ int** order_by_priority(int*** ptr_process_list, int* N) {
         }
     }
 
-    print_process_list(ordered_list, N);
-    printf("\n\n");
+    // print_process_list(ordered_list, N);
+    // printf("\n\n");
     return ordered_list;
 }
 
@@ -109,12 +109,20 @@ void process_events(int ***ptr_ordered_process, int process_i, int *N, int* tota
 
     if (*N == 0) return;
 
-    ordered_list[process_i][2]--;
-    if (ordered_list[process_i][2] == 0) {
-        int N_ = *N;
-        N_--;
-        *N = N_;
-        // printf("%d %d\n", ordered_list[process_i][0], *total_time);
+    for (int i = 0; i < process_i; i++) {
+        if (ordered_list[i][1] == *total_time) process_i = i;
+    }
+
+    bool must_increment_time = false;
+    if (ordered_list[process_i][1] <= *total_time && ordered_list[process_i][2] > 0){
+        ordered_list[process_i][2]--;
+        if (ordered_list[process_i][2] == 0) {
+            int N_ = *N;
+            N_--;
+            *N = N_;
+            printf("%d %d\n", ordered_list[process_i][0], *total_time);
+        }
+        must_increment_time = true;
     }
 
     // printf("PROCESS: %d\t TIME: %d", ordered_list[process_i][0], *total_time);
@@ -124,9 +132,11 @@ void process_events(int ***ptr_ordered_process, int process_i, int *N, int* tota
 
     process_i = (process_i + 1)%(*total_processes);
 
-    int total_time_ = *total_time;
-    total_time_++;
-    *total_time = total_time_;
+    if (must_increment_time) {
+        int total_time_ = *total_time;
+        total_time_++;
+        *total_time = total_time_;
+    }
 
     process_events(ptr_ordered_process, process_i, N, total_processes, total_time);
 }
@@ -134,9 +144,9 @@ void process_events(int ***ptr_ordered_process, int process_i, int *N, int* tota
 void select_scheduler_algorithm(int*** ptr_process_list, int* N, int* total_processes) {
     int** process_list = *ptr_process_list;
 
-    printf("ORIGINAL:\n");
-    print_process_list(process_list, total_processes);
-    printf("\n");
+    // printf("ORIGINAL:\n");
+    // print_process_list(process_list, total_processes);
+    // printf("\n");
 
     int **ordered_by_priority = order_by_priority(ptr_process_list, N);
 
@@ -159,7 +169,7 @@ void process_by_scheduler_algorithm(int*** ptr_process_list, int* N, int* total_
 
 int main(void) {
     int** process_list = NULL;
-    int N = 0;
+    int N = 4;
 
     process_list = store_list(&N);
 
@@ -167,22 +177,23 @@ int main(void) {
     // for (int i = 0; i < N; i++) {
     //     process_list[i] = calloc(COLUMNS, sizeof(int));
     // }
-    // process_list[0][0] = 27;
-    // process_list[0][1] = 1;
+
+    // process_list[0][0] = 126;
+    // process_list[0][1] = 2;
     // process_list[0][2] = 3;
     // process_list[0][3] = 4;
-    // process_list[1][0] = 3;
+    // process_list[1][0] = 478;
     // process_list[1][1] = 1;
     // process_list[1][2] = 3;
     // process_list[1][3] = 3;
-    // process_list[2][0] = 15;
+    // process_list[2][0] = 12;
     // process_list[2][1] = 1;
     // process_list[2][2] = 3;
     // process_list[2][3] = 2;
-    // process_list[3][0] = 325;
+    // process_list[3][0] = 1759;
     // process_list[3][1] = 1;
     // process_list[3][2] = 3;
-    // process_list[3][3] = 4;
+    // process_list[3][3] = 1;
 
     made_code_unique_recursively(&process_list, &N, true);
 
