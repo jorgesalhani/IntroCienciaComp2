@@ -100,49 +100,46 @@ int** order_by_priority(int*** ptr_process_list, int* N) {
 
 void add_new_process_by_time(int ***ptr_ordered_process, int *process_i, int *total_time) {
     int** ordered_list = *ptr_ordered_process;
-
     for (int i = 0; i < *process_i; i++) {
-        if (ordered_list[i][1] == *total_time) {
-            *process_i = i;
-        }
+        if (ordered_list[i][1] == *total_time) *process_i = i;
     }
 }
 
-void execute_process(int ***ptr_ordered_process, int *N, int process_i, int *total_time, bool *must_increment_time) {
+void execute_process(int ***ptr_ordered_process, int* process_i, int *N, int* total_time, bool *must_increment_time) {
     int** ordered_list = *ptr_ordered_process;
 
-    if (ordered_list[process_i][1] <= *total_time && ordered_list[process_i][2] > 0){
-        ordered_list[process_i][2]--;
-        if (ordered_list[process_i][2] == 0) {
+    if (ordered_list[*process_i][1] <= *total_time && ordered_list[*process_i][2] > 0){
+        ordered_list[*process_i][2]--;
+        if (ordered_list[*process_i][2] == 0) {
             int N_ = *N;
             N_--;
             *N = N_;
-            printf("%d %d\n", ordered_list[process_i][0], *total_time);
+            printf("%d %d\n", ordered_list[*process_i][0], *total_time);
         }
         *must_increment_time = true;
     }
 }
 
 void increment_time(int *total_time, bool *must_increment_time) {
-    if (must_increment_time) {
+    if (*must_increment_time) {
         int total_time_ = *total_time;
         total_time_++;
         *total_time = total_time_;
     }
 }
 
-void process_events(int ***ptr_ordered_process, int process_i, int *N, int* total_processes, int* total_time) {
+void process_events(int ***ptr_ordered_process, int* process_i, int *N, int* total_processes, int* total_time) {
     int** ordered_list = *ptr_ordered_process;
 
     if (*N == 0) return;
 
-    add_new_process_by_time(ptr_ordered_process, &process_i, total_time);
+    add_new_process_by_time(ptr_ordered_process, process_i, total_time);
 
     bool must_increment_time = false;
+    execute_process(ptr_ordered_process, process_i, N, total_time, &must_increment_time);
 
-    execute_process(ptr_ordered_process, N, process_i, total_time, &must_increment_time);
-
-    process_i = (process_i + 1)%(*total_processes);
+    int process_i_ = (*process_i + 1)%(*total_processes);
+    *process_i = process_i_;
 
     increment_time(total_time, &must_increment_time);
 
@@ -151,13 +148,12 @@ void process_events(int ***ptr_ordered_process, int process_i, int *N, int* tota
 
 void select_scheduler_algorithm(int*** ptr_process_list, int* N, int* total_processes) {
     int** process_list = *ptr_process_list;
-
     int **ordered_by_priority = order_by_priority(ptr_process_list, N);
 
     int process_i = 0;
     int total_time = 1;
 
-    process_events(&ordered_by_priority, process_i, N, total_processes, &total_time);
+    process_events(&ordered_by_priority, &process_i, N, total_processes, &total_time);
     free_matrix(ordered_by_priority, total_processes);
 }
 
