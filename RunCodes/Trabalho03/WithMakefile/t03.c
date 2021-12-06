@@ -99,8 +99,8 @@ int** order_by_priority(int*** ptr_process_list, int* N) {
         }
     }
 
-    print_process_list(ordered_list, N);
-    printf("\n\n");
+    // print_process_list(ordered_list, N);
+    // printf("\n\n");
     return ordered_list;
 }
 
@@ -114,7 +114,7 @@ void process_events(int ***ptr_ordered_process, int process_i, int *N, int* tota
         int N_ = *N;
         N_--;
         *N = N_;
-        // printf("%d %d\n", ordered_list[process_i][0], *total_time);
+        printf("%d %d\n", ordered_list[process_i][0], *total_time);
     }
 
     // printf("PROCESS: %d\t TIME: %d", ordered_list[process_i][0], *total_time);
@@ -134,9 +134,9 @@ void process_events(int ***ptr_ordered_process, int process_i, int *N, int* tota
 void select_scheduler_algorithm(int*** ptr_process_list, int* N, int* total_processes) {
     int** process_list = *ptr_process_list;
 
-    printf("ORIGINAL:\n");
-    print_process_list(process_list, total_processes);
-    printf("\n");
+    // printf("ORIGINAL:\n");
+    // print_process_list(process_list, total_processes);
+    // printf("\n");
 
     int **ordered_by_priority = order_by_priority(ptr_process_list, N);
 
