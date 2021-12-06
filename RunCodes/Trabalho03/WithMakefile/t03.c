@@ -9,9 +9,6 @@ Titulo:     Trabalho 03: Escalonador de processos
 #include <stdbool.h>
 
 #define COLUMNS 4
-#define PROCESS_MAX_PRIORITY 4
-
-int PROCESS_PRIORITIES[4] = {1,2,3,4};
 
 int** store_list(int* N) {
     int** process_list = NULL;
@@ -101,16 +98,19 @@ int** order_by_priority(int*** ptr_process_list, int* N) {
     return ordered_list;
 }
 
-void process_events(int ***ptr_ordered_process, int process_i, int *N, int* total_processes, int* total_time) {
+void add_new_process_by_time(int ***ptr_ordered_process, int *process_i, int *total_time) {
     int** ordered_list = *ptr_ordered_process;
 
-    if (*N == 0) return;
-
-    for (int i = 0; i < process_i; i++) {
-        if (ordered_list[i][1] == *total_time) process_i = i;
+    for (int i = 0; i < *process_i; i++) {
+        if (ordered_list[i][1] == *total_time) {
+            *process_i = i;
+        }
     }
+}
 
-    bool must_increment_time = false;
+void execute_process(int ***ptr_ordered_process, int *N, int process_i, int *total_time, bool *must_increment_time) {
+    int** ordered_list = *ptr_ordered_process;
+
     if (ordered_list[process_i][1] <= *total_time && ordered_list[process_i][2] > 0){
         ordered_list[process_i][2]--;
         if (ordered_list[process_i][2] == 0) {
@@ -119,16 +119,32 @@ void process_events(int ***ptr_ordered_process, int process_i, int *N, int* tota
             *N = N_;
             printf("%d %d\n", ordered_list[process_i][0], *total_time);
         }
-        must_increment_time = true;
+        *must_increment_time = true;
     }
+}
 
-    process_i = (process_i + 1)%(*total_processes);
-
+void increment_time(int *total_time, bool *must_increment_time) {
     if (must_increment_time) {
         int total_time_ = *total_time;
         total_time_++;
         *total_time = total_time_;
     }
+}
+
+void process_events(int ***ptr_ordered_process, int process_i, int *N, int* total_processes, int* total_time) {
+    int** ordered_list = *ptr_ordered_process;
+
+    if (*N == 0) return;
+
+    add_new_process_by_time(ptr_ordered_process, &process_i, total_time);
+
+    bool must_increment_time = false;
+
+    execute_process(ptr_ordered_process, N, process_i, total_time, &must_increment_time);
+
+    process_i = (process_i + 1)%(*total_processes);
+
+    increment_time(total_time, &must_increment_time);
 
     process_events(ptr_ordered_process, process_i, N, total_processes, total_time);
 }
@@ -154,7 +170,7 @@ void process_by_scheduler_algorithm(int*** ptr_process_list, int* N, int* total_
 
 int main(void) {
     int** process_list = NULL;
-    int N = 4;
+    int N = 0;
 
     process_list = store_list(&N);
 
