@@ -160,6 +160,7 @@ char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* 
 
         while (j < *N && ordered_word_list[j][0] == letter) {
             block_words[count] = ordered_word_list[j];
+            printf("(%d %s)  ", count, block_words[count]);
             count++;
             block_words = (char**)realloc(block_words, sizeof(char**)*(count+1));
             j++;
@@ -173,7 +174,6 @@ char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* 
             break;
         }
     }
-
     if (i == *N) {
         free(block_words);
         block_words = NULL;
@@ -182,11 +182,15 @@ char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* 
     return block_words;
 }
 
-IndexVector* create_update_index_vector(char*** ptr_ordered_word_list, int* N, int* non_empty_indexes) {
+IndexVector* create_update_index_vector(IndexVector **ptr_index_vector, char*** ptr_ordered_word_list, int* N, int* non_empty_indexes) {
     char** ordered_word_list = *ptr_ordered_word_list;
-
-    IndexVector* index_vector = NULL;
-    index_vector = (IndexVector*)malloc(sizeof(IndexVector)*ALPHABET_LETTERS);
+    IndexVector *index_vector = NULL;
+    IndexVector *index_vector_ = *ptr_index_vector;
+    if (index_vector_ != NULL) {
+        index_vector = index_vector_;
+    } else {
+        index_vector = (IndexVector*)malloc(sizeof(IndexVector)*ALPHABET_LETTERS);
+    }
 
     char letter_ = 'a';
     for (int i = 0; i < ALPHABET_LETTERS; i++) {
@@ -282,7 +286,7 @@ void process_all_commands(void) {
             print_three_first_words(&ordered_word_list);
         } else {
             if (command == 2) {
-                index_vector = create_update_index_vector(&ordered_word_list, &N, &non_empty_indexes);
+                index_vector = create_update_index_vector(&index_vector, &ordered_word_list, &N, &non_empty_indexes);
                 printf("%d\n", non_empty_indexes);
             } else {
                 if (command == 3) {
