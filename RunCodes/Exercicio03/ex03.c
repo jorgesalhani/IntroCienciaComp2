@@ -160,8 +160,6 @@ char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* 
         int j = i;
 
         while (j < *N && ordered_word_list[j][0] == letter) {
-            // printf("%s\n", ordered_word_list[j]);
-            block_words[count] = (char*)malloc(sizeof(char)*(WORD_MAX_LENGTH));
             block_words[count] = ordered_word_list[j];
             count++;
             block_words = (char**)realloc(block_words, sizeof(char**)*(count+1));
@@ -170,7 +168,6 @@ char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* 
 
         if (count > 0) {
             block_words = (char**)realloc(block_words, sizeof(char**)*(count+1));
-            block_words[count] = (char*)malloc(sizeof(char));
             block_words[count] = "@";
             non_empty_indexes_++;
             *non_empty_indexes = non_empty_indexes_;
@@ -256,7 +253,7 @@ void search(IndexVector** ptr_index_vector, char*** ptr_ordered_word_list, int* 
                     }
                     l++;
                 }
-                printf("%d \n", l);
+                printf("%d\n", l);
                 // printf("\n\n%s %s\n\n", ordered_word_list[j], query_word);
                 // if (strcmp(ordered_word_list[j], query_word) == 0) {
                 //     printf("%d\n", l);
