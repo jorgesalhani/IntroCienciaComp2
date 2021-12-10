@@ -21,6 +21,7 @@ typedef struct index_vector
 
 void free_word_list(char*** ptr_to_word_list, int* N) {
     char** word_list = *ptr_to_word_list;
+    printf("FREE: %p AND %p\n", ptr_to_word_list, word_list);
     for (int i = 0; i < *N; i++) {
         free(word_list[i]);
     }
@@ -75,8 +76,10 @@ char** order_word_list(char*** ptr_word_list, int* N) {
     }
 
     char** ordered_word_list = (char**)malloc(sizeof(char*)*(*N));
+    printf("ALLOC: %p\n", ordered_word_list);
     for (int i = 0; i < *N; i++) {
         ordered_word_list[i] = (char*)calloc(sizeof(char), WORD_MAX_LENGTH);
+        printf("alloc: %p\n", ordered_word_list[i]);
     }
 
     build_cumulate_frequency_histogram(&keys_vector, &key_range);
@@ -126,11 +129,12 @@ char** store_word_list(FILE* file_, int* N) {
 
     char** ordered_word_list = NULL;
     ordered_word_list = order_word_list(&word_list, N);
+    // for (int i = 0; i < *N; i++) printf("%s\t%d\n", ordered_word_list[i], i);
     free_word_list(&word_list, N);
     return ordered_word_list;
 }
 
-char** read_file_and_create_list(int* N) {
+char** read_file_and_create_list(char*** ptr_ordered_word_list, int* N) {
     char file_name[50];
     scanf("%s ", file_name);
 
@@ -140,8 +144,23 @@ char** read_file_and_create_list(int* N) {
         exit(-1);
     }
 
+    int previous_list_N = *N;
+
     char** ordered_word_list = NULL;
     ordered_word_list = store_word_list(file_, N);
+
+    if (previous_list_N > 0) {        
+        int total_new_words = *N + previous_list_N;
+        char** previous_ordered_word_list = *ptr_ordered_word_list;
+        ordered_word_list = (char**)realloc(ordered_word_list, sizeof(char**)*(total_new_words));
+        int j = *N;
+        for (int i = 0; i < previous_list_N; i++) {
+            ordered_word_list[j] = previous_ordered_word_list[i];
+            j++;
+        }
+
+        *N = total_new_words;
+    }
 
     fclose(file_);
     return ordered_word_list;
@@ -282,7 +301,7 @@ void process_all_commands(void) {
         read_command(&command);
 
         if (command == 1) {
-            ordered_word_list = read_file_and_create_list(&N);
+            ordered_word_list = read_file_and_create_list(&ordered_word_list, &N);
             print_three_first_words(&ordered_word_list);
         } else {
             if (command == 2) {
