@@ -172,6 +172,7 @@ char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* 
             non_empty_indexes_++;
             *non_empty_indexes = non_empty_indexes_;
             break;
+            // AA
         }
     }
 
