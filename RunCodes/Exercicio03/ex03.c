@@ -21,21 +21,20 @@ typedef struct index_vector
 
 void free_word_list(char*** ptr_to_word_list, int* N) {
     char** word_list = *ptr_to_word_list;
-    printf("FREE: %p AND %p\n", ptr_to_word_list, word_list);
     for (int i = 0; i < *N; i++) {
         free(word_list[i]);
     }
     free(word_list);
 }
 
-void copy_word(int* cursor, char*** ptr_word_list, char*** ptr_word_list_copy) {
+void copy_word(int* cursor, int* new_cursor, char*** ptr_word_list, char*** ptr_word_list_copy) {
     char** word_list = *ptr_word_list;
     char** word_list_copy = *ptr_word_list_copy;
 
-    int word_length = strlen(word_list[*cursor]);
+    int word_length = strlen(word_list[*new_cursor]);
     word_list_copy[*cursor] = (char*)malloc(sizeof(char*)*(word_length+1));
     for (int i = 0; i < word_length; i++) {
-        word_list_copy[*cursor][i] = word_list[*cursor][i];
+        word_list_copy[*cursor][i] = word_list[*new_cursor][i];
     }
     word_list_copy[*cursor][word_length] = '\0';
 }
@@ -63,7 +62,7 @@ char** order_word_list(char*** ptr_word_list, int* N) {
         if (key > max) max = key;
         if (key < min) min = key;
         
-        copy_word(&i, ptr_word_list, &word_list_copy);
+        copy_word(&i, &i, ptr_word_list, &word_list_copy);
     }
 
     int key_range = (max-min) + 1;
@@ -76,10 +75,8 @@ char** order_word_list(char*** ptr_word_list, int* N) {
     }
 
     char** ordered_word_list = (char**)malloc(sizeof(char*)*(*N));
-    printf("ALLOC: %p\n", ordered_word_list);
     for (int i = 0; i < *N; i++) {
         ordered_word_list[i] = (char*)calloc(sizeof(char), WORD_MAX_LENGTH);
-        printf("alloc: %p\n", ordered_word_list[i]);
     }
 
     build_cumulate_frequency_histogram(&keys_vector, &key_range);
@@ -95,6 +92,7 @@ char** order_word_list(char*** ptr_word_list, int* N) {
 
         keys_vector[key - min]++;
     }
+
     free(keys_vector);
     free_word_list(&word_list_copy, N);
 
@@ -106,35 +104,25 @@ char** store_word_list(FILE* file_, int* N) {
     int word_count = 0;
     char letter_ = fgetc(file_);
 
-
-    word_list = (char**)malloc(sizeof(char*));
     while (!feof(file_)) {
-        word_list = (char**)realloc(word_list, sizeof(char*)*(word_count+1));
+        word_list = (char**)realloc(word_list, sizeof(char*)*(word_count+1)); // 128 direct, 30 indirect
 
         int cursor = 0;
-        word_list[word_count] = (char*)malloc(sizeof(char));
+        word_list[word_count] = (char*)calloc(WORD_MAX_LENGTH, sizeof(char));
         while (letter_ != '\n' && !feof(file_)) {
-            word_list[word_count] = (char*)realloc(word_list[word_count], sizeof(char)*(cursor+1));
             word_list[word_count][cursor] = letter_;
             letter_ = fgetc(file_);
             cursor++;
         }
-        word_list[word_count] = (char*)realloc(word_list[word_count], sizeof(char)*(cursor+1));
-        word_list[word_count][cursor] = '\0';
 
         word_count++;
         letter_ = fgetc(file_);
     }
     *N = word_count; 
-
-    char** ordered_word_list = NULL;
-    ordered_word_list = order_word_list(&word_list, N);
-    // for (int i = 0; i < *N; i++) printf("%s\t%d\n", ordered_word_list[i], i);
-    free_word_list(&word_list, N);
-    return ordered_word_list;
+    return word_list;
 }
 
-char** read_file_and_create_list(char*** ptr_ordered_word_list, int* N) {
+void read_file_and_create_list(char*** ptr_ordered_word_list, int* N) {
     char file_name[50];
     scanf("%s ", file_name);
 
@@ -146,24 +134,44 @@ char** read_file_and_create_list(char*** ptr_ordered_word_list, int* N) {
 
     int previous_list_N = *N;
 
-    char** ordered_word_list = NULL;
-    ordered_word_list = store_word_list(file_, N);
+    char** word_list = NULL;
+    word_list = store_word_list(file_, N); // 2
 
-    if (previous_list_N > 0) {        
-        int total_new_words = *N + previous_list_N;
+    char** new_word_list = NULL;
+    int total_new_words = *N + previous_list_N;
+    
+    if (previous_list_N > 0) {
         char** previous_ordered_word_list = *ptr_ordered_word_list;
-        ordered_word_list = (char**)realloc(ordered_word_list, sizeof(char**)*(total_new_words));
-        int j = *N;
-        for (int i = 0; i < previous_list_N; i++) {
-            ordered_word_list[j] = previous_ordered_word_list[i];
-            j++;
+        new_word_list = (char**)malloc(sizeof(char*)*(total_new_words));
+        int i = 0;
+        for (i = 0; i < *N; i++) {
+            new_word_list[i] = (char*)malloc(sizeof(char)*(WORD_MAX_LENGTH)); // 12
+            copy_word(&i, &i, &word_list, &new_word_list);
         }
 
-        *N = total_new_words;
+        for (int j = 0; j < previous_list_N; j++) {
+            new_word_list[i] = (char*)malloc(sizeof(char)*(WORD_MAX_LENGTH)); // 4
+            copy_word(&i, &j, &word_list, &new_word_list);
+
+            i++;
+        }
     }
 
+    char** ordered_word_list = NULL;
+
+    if (previous_list_N > 0) {
+
+        ordered_word_list = order_word_list(&new_word_list, &total_new_words);
+        free_word_list(&new_word_list, &total_new_words);
+
+    } else {
+        ordered_word_list = order_word_list(&word_list, &total_new_words); // 1
+    }
+
+    free_word_list(&word_list, N);
     fclose(file_);
-    return ordered_word_list;
+    *ptr_ordered_word_list = ordered_word_list;
+    *N = total_new_words;
 }
 
 char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* non_empty_indexes) {
@@ -181,12 +189,12 @@ char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* 
             block_words[count] = ordered_word_list[j];
             printf("(%d %s)  ", count, block_words[count]);
             count++;
-            block_words = (char**)realloc(block_words, sizeof(char**)*(count+1));
+            block_words = (char**)realloc(block_words, sizeof(char*)*(count+1));
             j++;
         }
 
         if (count > 0) {
-            block_words = (char**)realloc(block_words, sizeof(char**)*(count+1));
+            block_words = (char**)realloc(block_words, sizeof(char*)*(count+1));
             block_words[count] = "@";
             non_empty_indexes_++;
             *non_empty_indexes = non_empty_indexes_;
@@ -301,7 +309,7 @@ void process_all_commands(void) {
         read_command(&command);
 
         if (command == 1) {
-            ordered_word_list = read_file_and_create_list(&ordered_word_list, &N);
+            read_file_and_create_list(&ordered_word_list, &N);
             print_three_first_words(&ordered_word_list);
         } else {
             if (command == 2) {

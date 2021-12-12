@@ -10,5 +10,3 @@ whole
 pencil
 smelly
 angry
-grape
-salty
