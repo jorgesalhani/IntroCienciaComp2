@@ -73,11 +73,8 @@ char** order_word_list(char*** ptr_word_list, int* N) {
         int key_position = key - min;
         keys_vector[key_position]++;
     }
-
+    printf("N = %d\n", *N);
     char** ordered_word_list = (char**)malloc(sizeof(char*)*(*N));
-    for (int i = 0; i < *N; i++) {
-        ordered_word_list[i] = (char*)calloc(sizeof(char), WORD_MAX_LENGTH);
-    }
 
     build_cumulate_frequency_histogram(&keys_vector, &key_range);
 
@@ -85,10 +82,7 @@ char** order_word_list(char*** ptr_word_list, int* N) {
         key = (int)word_list_copy[i][0];
         int word_correct_position = keys_vector[key - min];
 
-        int word_length = strlen(word_list_copy[i]);
-        for (int j = 0; j < word_length; j++) {
-            ordered_word_list[word_correct_position][j] = word_list_copy[i][j];
-        }
+        copy_word(&word_correct_position, &i, &word_list_copy ,&ordered_word_list);
 
         keys_vector[key - min]++;
     }
@@ -122,7 +116,7 @@ char** store_word_list(FILE* file_, int* N) {
     return word_list;
 }
 
-void read_file_and_create_list(char*** ptr_ordered_word_list, int* N) {
+char** read_file_and_create_list(char*** ptr_ordered_word_list, int* N) {
     char file_name[50];
     scanf("%s ", file_name);
 
@@ -142,17 +136,14 @@ void read_file_and_create_list(char*** ptr_ordered_word_list, int* N) {
     
     if (previous_list_N > 0) {
         char** previous_ordered_word_list = *ptr_ordered_word_list;
-        new_word_list = (char**)malloc(sizeof(char*)*(total_new_words));
+        new_word_list = (char**)malloc(total_new_words*sizeof(char*));
         int i = 0;
         for (i = 0; i < *N; i++) {
-            new_word_list[i] = (char*)malloc(sizeof(char)*(WORD_MAX_LENGTH)); // 12
             copy_word(&i, &i, &word_list, &new_word_list);
         }
 
         for (int j = 0; j < previous_list_N; j++) {
-            new_word_list[i] = (char*)malloc(sizeof(char)*(WORD_MAX_LENGTH)); // 4
-            copy_word(&i, &j, &word_list, &new_word_list);
-
+            copy_word(&i, &j, &previous_ordered_word_list, &new_word_list);
             i++;
         }
     }
@@ -170,8 +161,8 @@ void read_file_and_create_list(char*** ptr_ordered_word_list, int* N) {
 
     free_word_list(&word_list, N);
     fclose(file_);
-    *ptr_ordered_word_list = ordered_word_list;
     *N = total_new_words;
+    return ordered_word_list;
 }
 
 char** get_block_words(char*** ptr_ordered_word_list, char letter, int* N, int* non_empty_indexes) {
@@ -309,8 +300,11 @@ void process_all_commands(void) {
         read_command(&command);
 
         if (command == 1) {
-            read_file_and_create_list(&ordered_word_list, &N);
+            ordered_word_list = read_file_and_create_list(&ordered_word_list, &N);
             print_three_first_words(&ordered_word_list);
+            printf("\n\n");
+            for (int k = 0; k < N; k++) printf("%s\n", ordered_word_list[k]);
+            printf("\n");
         } else {
             if (command == 2) {
                 index_vector = create_update_index_vector(&index_vector, &ordered_word_list, &N, &non_empty_indexes);
@@ -333,6 +327,7 @@ void process_all_commands(void) {
                     free(index_vector[i].word_block);
                 }
             }
+            printf("N = %d\n", N);
             free_word_list(&ordered_word_list, &N);
             free(index_vector);
 
