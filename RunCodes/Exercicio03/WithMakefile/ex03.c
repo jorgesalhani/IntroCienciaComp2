@@ -230,8 +230,8 @@ IndexVector* create_update_index_vector(IndexVector **ptr_index_vector, char*** 
 }
 
 
-void search(IndexVector** ptr_index_vector, char*** ptr_ordered_word_list, int* N, int* non_empty_indexes) {
-    if (*non_empty_indexes == 0) {
+void search(IndexVector** ptr_index_vector, char*** ptr_ordered_word_list, int* N, int* non_empty_indexes, bool *is_up_to_date) {
+    if (!(*is_up_to_date)) {
         char query_word[WORD_MAX_LENGTH];
         scanf("%s", query_word);
         printf("Vetor de indices nao atualizado.\n");
@@ -307,20 +307,22 @@ void process_all_commands(void) {
     int N = 0;
     int non_empty_indexes = 0;
     IndexVector* index_vector = NULL;
+    bool is_up_to_date = false;
 
     while (!feof(stdin)) {
         read_command(&command);
-
         if (command == 1) {
             ordered_word_list = read_file_and_create_list(&ordered_word_list, &N);
             print_three_first_words(&ordered_word_list);
+            is_up_to_date = false;
         } else {
             if (command == 2) {
                 index_vector = create_update_index_vector(&index_vector, &ordered_word_list, &N, &non_empty_indexes);
                 printf("%d\n", non_empty_indexes);
+                is_up_to_date = true;
             } else {
                 if (command == 3) {
-                    search(&index_vector, &ordered_word_list, &N, &non_empty_indexes);
+                    search(&index_vector, &ordered_word_list, &N, &non_empty_indexes, &is_up_to_date);
                 }
             }
         }
