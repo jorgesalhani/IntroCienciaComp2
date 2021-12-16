@@ -1,0 +1,14 @@
+3
+12
+get 0
+check help
+add help
+add del
+add add
+check add
+check del
+del del
+check del
+get 0
+get 1
+get 2
