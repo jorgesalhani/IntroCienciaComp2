@@ -7,6 +7,7 @@ Titulo:     Trabalho 04: Hash Table
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 const char ADD[4] = "add";
 const char GET[4] = "get";
@@ -77,9 +78,51 @@ void read_int_parameter(int *int_parameter) {
     scanf("%d ", int_parameter);
 }
 
+bool check_position_availability(ChainList **ptr_chain_list, int *word_position) {
+    ChainList *chain_list = *ptr_chain_list;
+    if (chain_list[*word_position].word == NULL) return true;
+    return false;
+}
+
+bool check_word_existence(ChainList **ptr_chain_list, int *word_position, char* word) {
+    ChainList *chain_list = *ptr_chain_list;
+    char *word_content = chain_list[*word_position].word;
+    ChainList *new_chain = chain_list[*word_position].chain_list;
+    while (new_chain != NULL) {
+        if (strcmp(new_chain[0].word, word) == 0) return true;
+        new_chain = new_chain->chain_list;
+    }
+    return false;
+}
+
+void add_word_to_list_beginning(ChainList **ptr_chain_list, int *word_position, char *word) {
+    // ChainList *chain_list = *ptr_chain_list;
+    // ChainList *new_chain = NULL;
+    // strcpy(new_chain->word, word);
+    
+    // chain_list[*word_position].chain_list = new_chain->chain_list;
+    // new_chain->chain_list = 
+
+}
+
 void execute_add(char *word, ChainList **ptr_chain_list, int *list_number) {
+    ChainList *chain_list = *ptr_chain_list;
     int word_position = calculate_hash_position(word, list_number);
-    printf("%d\n", word_position);
+    bool is_position_available = check_position_availability(ptr_chain_list, &word_position);
+    
+    if (is_position_available) {
+        int word_length = strlen(word);
+        chain_list[word_position].word = (char*)malloc(sizeof(char)*(word_length+1));
+        chain_list[word_position].word[word_length] = '\0';
+        strcpy(chain_list[word_position].word, word);
+        return;
+    }
+
+    bool is_word_in_list = check_word_existence(ptr_chain_list, &word_position, word);
+    if (!is_word_in_list) {
+        add_word_to_list_beginning(ptr_chain_list, &word_position, word);
+    }
+
 }
 
 void execute_get() {
@@ -94,6 +137,20 @@ void execute_del() {
 
 }
 
+// void free_chain_lists(ChainList **ptr_chain_list, int *list_number) {
+//     ChainList *chain_list = *ptr_chain_list;
+//     for (int i = 0; i < *list_number; i++) {
+//         if (chain_list[i].chain_list != NULL) {
+//             ChainList *new_chain = chain_list[i].chain_list;
+//             while (new_chain != NULL) {
+//                free()
+//                 new_chain = new_chain->chain_list;
+//             }
+//             return false;
+//         }
+//     }
+// }
+
 void process_instructions(int *list_number, int *instructions_number, ChainList **ptr_chain_list) {
     for (int i = 0; i < *instructions_number; i++) {
         char *instruction = read_input_word();
@@ -103,6 +160,7 @@ void process_instructions(int *list_number, int *instructions_number, ChainList 
         if (strcmp(instruction, ADD) == 0) {
             word_parameter = read_input_word();
             execute_add(word_parameter, ptr_chain_list, list_number);
+            printf("(%s, %p)\n", )
             free(word_parameter);
         }
 
@@ -129,7 +187,7 @@ void process_instructions(int *list_number, int *instructions_number, ChainList 
 
 ChainList *build_main_chain_list(int *list_number) {
     ChainList *chain_list = NULL;
-    chain_list = malloc(sizeof(ChainList)*(*list_number));
+    chain_list = calloc((*list_number), sizeof(ChainList));
     return chain_list;
 }
 
