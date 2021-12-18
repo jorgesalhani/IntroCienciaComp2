@@ -96,13 +96,17 @@ bool check_word_existence(ChainList **ptr_chain_list, int *word_position, char* 
 }
 
 void add_word_to_list_beginning(ChainList **ptr_chain_list, int *word_position, char *word) {
-    // ChainList *chain_list = *ptr_chain_list;
-    // ChainList *new_chain = NULL;
-    // strcpy(new_chain->word, word);
-    
-    // chain_list[*word_position].chain_list = new_chain->chain_list;
-    // new_chain->chain_list = 
+    ChainList *chain_list = *ptr_chain_list;
+    ChainList *new_chain = NULL;
+    new_chain = calloc(1, sizeof(ChainList));
 
+    int word_length = strlen(word);
+    new_chain->word = (char*)malloc(sizeof(char)*(word_length+1));
+    new_chain->word[word_length] = '\0';
+    strcpy(new_chain->word, word);
+    
+    chain_list[*word_position].chain_list = new_chain->chain_list;
+    new_chain->chain_list = chain_list[*word_position].chain_list;
 }
 
 void execute_add(char *word, ChainList **ptr_chain_list, int *list_number) {
@@ -115,6 +119,7 @@ void execute_add(char *word, ChainList **ptr_chain_list, int *list_number) {
         chain_list[word_position].word = (char*)malloc(sizeof(char)*(word_length+1));
         chain_list[word_position].word[word_length] = '\0';
         strcpy(chain_list[word_position].word, word);
+        printf("at %d\n", word_position);
         return;
     }
 
@@ -160,7 +165,6 @@ void process_instructions(int *list_number, int *instructions_number, ChainList 
         if (strcmp(instruction, ADD) == 0) {
             word_parameter = read_input_word();
             execute_add(word_parameter, ptr_chain_list, list_number);
-            printf("(%s, %p)\n", )
             free(word_parameter);
         }
 
@@ -185,6 +189,18 @@ void process_instructions(int *list_number, int *instructions_number, ChainList 
     }
 }
 
+void print_chain_list(ChainList **ptr_chain_list, int *list_number) {
+    ChainList *chain_list = *ptr_chain_list;
+    for (int i = 0; i < *list_number; i++) {
+        ChainList *ptr_next_node = chain_list[i].chain_list;
+        if (ptr_next_node != NULL) {
+            printf("AAAA\n");
+            printf("(%p: %s), ", chain_list[i].chain_list, chain_list[i].word);
+        }
+        printf("\n");
+    }
+}
+
 ChainList *build_main_chain_list(int *list_number) {
     ChainList *chain_list = NULL;
     chain_list = calloc((*list_number), sizeof(ChainList));
@@ -200,6 +216,8 @@ int main(void) {
     chain_list = build_main_chain_list(&list_number);
 
     process_instructions(&list_number, &instructions_number, &chain_list);
+
+    print_chain_list(&chain_list, &list_number);
     free(chain_list);
 
     return 0;
