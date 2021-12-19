@@ -160,22 +160,25 @@ void execute_del() {
 
 void free_chain_lists(ChainList **ptr_chain_list, int *list_number) {
     ChainList *chain_list = *ptr_chain_list;
+    ChainList *new_chain = NULL;
     for (int i = 0; i < *list_number; i++) {
-        if (chain_list[i].chain_list != NULL) {
-            ChainList *new_chain = chain_list[i].chain_list;
-            int chained_count = 0;
-            while (new_chain != NULL) {
-                new_chain = new_chain->chain_list;
-                chained_count++;
-            }
-
-            // while (chained_count > 0) {
-            //     free(new_chain[chained_count].word);
-            //     free(new_chain[chained_count-1].chain_list);
-            //     chained_count--;
-            // }
-            free(new_chain);
+        if (chain_list[i].chain_list == NULL) {
+            continue;
         }
+
+        new_chain = chain_list[i].chain_list;
+        while (new_chain != NULL) {
+            printf("Free: %s\n", new_chain->word);
+            free(new_chain->word);
+
+            ChainList *detached_node = NULL;
+            detached_node = new_chain->chain_list; 
+            new_chain = new_chain->chain_list;
+
+        }
+
+        printf("Free: %p\n", chain_list[i].chain_list);
+        free(chain_list[i].chain_list);
     }
 }
 
