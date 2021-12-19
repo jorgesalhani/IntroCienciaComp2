@@ -88,7 +88,7 @@ bool check_word_existence(ChainList **ptr_chain_list, int *word_position, char* 
     ChainList *chain_list = *ptr_chain_list;
     char *word_content = chain_list[*word_position].word;
     ChainList *new_chain = chain_list[*word_position].chain_list;
-    while (new_chain->chain_list != NULL) {
+    while (new_chain !=NULL && new_chain->chain_list != NULL) {
         if (strcmp(new_chain->word, word) == 0) return true;
         new_chain = new_chain->chain_list;
     }
@@ -146,15 +146,51 @@ void execute_add(char *word, ChainList **ptr_chain_list, int *list_number) {
     
 }
 
-void execute_get() {
+void execute_get(int *query_position, ChainList **ptr_chain_list) {
+    ChainList *chain_list = *ptr_chain_list;
+    ChainList *new_chain = NULL;
+    if (chain_list[*query_position].chain_list == NULL) {
+        printf("\n");
+        return;
+    }
 
+    new_chain = chain_list[*query_position].chain_list;
+    // fflush(stdout);
+    while (new_chain != NULL) {
+        printf(" %s", (*new_chain).word);
+        new_chain = new_chain->chain_list;
+    }
+    printf("\n");
 }
 
-void execute_check() {
-
+void execute_check(char *word, ChainList **ptr_chain_list, int *list_number) {
+    int word_position = calculate_hash_position(word, list_number);
+    bool word_exists = check_word_existence(ptr_chain_list, &word_position, word);
+    if (word_exists) printf("sim\n");
+    else printf("nao\n");
 }
 
-void execute_del() {
+void execute_del(char *word, ChainList **ptr_chain_list, int* list_number) {
+    int word_position = calculate_hash_position(word, list_number);
+    
+    ChainList *chain_list = *ptr_chain_list;
+    ChainList *new_chain = NULL;
+    bool position_is_available = check_position_availability(ptr_chain_list, &word_position);
+    if (position_is_available) return;
+
+    new_chain = chain_list[word_position].chain_list;
+    while (new_chain != NULL) {
+        if (strcmp(new_chain->word, word) == 0) {
+            if ((new_chain->chain_list != NULL) && (new_chain->chain_list->chain_list != NULL)) {
+                new_chain->chain_list = new_chain->chain_list->chain_list;
+            } else {
+                new_chain->chain_list = NULL;
+            }
+            // free(new_chain->word);
+            return;
+        }
+        new_chain = new_chain->chain_list;
+    }
 
 }
 
@@ -168,16 +204,15 @@ void free_chain_lists(ChainList **ptr_chain_list, int *list_number) {
 
         new_chain = chain_list[i].chain_list;
         while (new_chain != NULL) {
-            printf("Free: %s\n", new_chain->word);
+            // printf("Free: %s\n", new_chain->word);
             free(new_chain->word);
 
             ChainList *detached_node = NULL;
             detached_node = new_chain->chain_list; 
             new_chain = new_chain->chain_list;
-
         }
 
-        printf("Free: %p\n", chain_list[i].chain_list);
+        // printf("Free: %p\n", chain_list[i].chain_list);
         free(chain_list[i].chain_list);
     }
 }
@@ -215,18 +250,18 @@ void process_instructions(int *list_number, int *instructions_number, ChainList 
 
         if (strcmp(instruction, GET) == 0) {
             read_int_parameter(&int_parameter);
-            // Execute GET
+            execute_get(&int_parameter, ptr_chain_list);
         }
 
         if (strcmp(instruction, CHECK) == 0) {
             word_parameter = read_input_word();
-            // Execute CHECK
+            execute_check(word_parameter, ptr_chain_list, list_number);
             free(word_parameter);
         }
 
         if (strcmp(instruction, DEL) == 0) {
             word_parameter = read_input_word();
-            // Execute DEL
+            execute_del(word_parameter, ptr_chain_list, list_number);
             free(word_parameter);
         }
 
@@ -241,6 +276,7 @@ ChainList *build_main_chain_list(int *list_number) {
 }
 
 int main(void) {
+    setvbuf(stdout, NULL, _IONBF, 0);
 
     int list_number, instructions_number;
     read_list_and_instructions_number(&list_number, &instructions_number);
@@ -250,6 +286,7 @@ int main(void) {
 
     process_instructions(&list_number, &instructions_number, &chain_list);
 
+    printf("\nHASHTABLE:\n");
     print_hashtable(&chain_list, &list_number);
     free_chain_lists(&chain_list, &list_number);
     free(chain_list);
