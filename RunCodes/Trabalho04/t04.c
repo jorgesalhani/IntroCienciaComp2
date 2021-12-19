@@ -80,7 +80,7 @@ void read_int_parameter(int *int_parameter) {
 
 bool check_position_availability(ChainList **ptr_chain_list, int *word_position) {
     ChainList *chain_list = *ptr_chain_list;
-    if (chain_list[*word_position].word == NULL) return true;
+    if (chain_list[*word_position].chain_list == NULL) return true;
     return false;
 }
 
@@ -106,6 +106,12 @@ void add_word_to_list_beginning(ChainList **ptr_chain_list, int *word_position, 
     ChainList *ptr_to_next_chain_temp = chain_list[*word_position].chain_list;
     chain_list[*word_position].chain_list = new_chain;
     new_chain->chain_list = ptr_to_next_chain_temp;
+
+    int word_length = strlen(word);
+    new_chain->word = (char*)malloc(sizeof(char)*(word_length+1));
+    new_chain->word[word_length] = '\0';
+    
+    strcpy((*new_chain).word, word);
 }
 
 void add_word_to_header(ChainList **ptr_chain_list, char *word, int *word_position) {
@@ -128,7 +134,6 @@ void execute_add(char *word, ChainList **ptr_chain_list, int *list_number) {
     ChainList *chain_list = *ptr_chain_list;
     int word_position = calculate_hash_position(word, list_number);
     bool is_position_available = check_position_availability(ptr_chain_list, &word_position);
-
     if (is_position_available) {
         add_word_to_header(ptr_chain_list, word, &word_position);
         return;
@@ -153,33 +158,40 @@ void execute_del() {
 
 }
 
-// void free_chain_lists(ChainList **ptr_chain_list, int *list_number) {
-//     ChainList *chain_list = *ptr_chain_list;
-//     for (int i = 0; i < *list_number; i++) {
-//         if (chain_list[i].chain_list != NULL) {
-//             ChainList *new_chain = chain_list[i].chain_list;
-//             while (new_chain != NULL) {
-//                free()
-//                 new_chain = new_chain->chain_list;
-//             }
-//             return false;
-//         }
-//     }
-// }
+void free_chain_lists(ChainList **ptr_chain_list, int *list_number) {
+    ChainList *chain_list = *ptr_chain_list;
+    for (int i = 0; i < *list_number; i++) {
+        if (chain_list[i].chain_list != NULL) {
+            ChainList *new_chain = chain_list[i].chain_list;
+            int chained_count = 0;
+            while (new_chain != NULL) {
+                new_chain = new_chain->chain_list;
+                chained_count++;
+            }
+
+            // while (chained_count > 0) {
+            //     free(new_chain[chained_count].word);
+            //     free(new_chain[chained_count-1].chain_list);
+            //     chained_count--;
+            // }
+            free(new_chain);
+        }
+    }
+}
 
 void print_hashtable(ChainList **ptr_chain_list, int *list_number) {
     ChainList *chain_list = *ptr_chain_list;
     ChainList *new_chain = NULL;
     for (int i = 0; i < *list_number; i++) {
         if (chain_list[i].chain_list == NULL) {
-            printf("Table[%d] is empty\n", i);
+            printf("Table[%d]:\n\n", i);
             continue;
         }
 
         new_chain = chain_list[i].chain_list;
-        printf("Table[%d]", i);
+        printf("Table[%d]:\n\t", i);
         while (new_chain != NULL) {
-            printf("->%s", (*new_chain).word);
+            printf("->%s\n\t", (*new_chain).word);
             new_chain = new_chain->chain_list;
         }
         printf("\n");
@@ -236,6 +248,7 @@ int main(void) {
     process_instructions(&list_number, &instructions_number, &chain_list);
 
     print_hashtable(&chain_list, &list_number);
+    free_chain_lists(&chain_list, &list_number);
     free(chain_list);
 
     return 0;
