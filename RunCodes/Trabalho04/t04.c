@@ -178,19 +178,31 @@ void execute_del(char *word, ChainList **ptr_chain_list, int* list_number) {
     if (position_is_available) return;
 
     new_chain = chain_list[word_position].chain_list;
-    while (new_chain != NULL) {
-        if (strcmp(new_chain->word, word) == 0) {
-            if ((new_chain->chain_list != NULL) && (new_chain->chain_list->chain_list != NULL)) {
-                new_chain->chain_list = new_chain->chain_list->chain_list;
-            } else {
-                new_chain->chain_list = NULL;
-            }
-            // free(new_chain->word);
+
+    if (strcmp(new_chain->word, word) == 0) {
+        if (new_chain->chain_list != NULL) {
+            chain_list[word_position].chain_list = new_chain->chain_list;
             return;
         }
-        new_chain = new_chain->chain_list;
-    }
 
+        chain_list[word_position].chain_list = NULL;
+        return;
+    }
+    
+    if (new_chain != NULL) {
+        while (new_chain->chain_list != NULL) {
+            if (strcmp(new_chain->word, word) == 0) {
+                free(new_chain->word);
+                if (new_chain->chain_list->chain_list != NULL) {
+                    new_chain->chain_list = new_chain->chain_list->chain_list;
+                    return;
+                }
+                new_chain->chain_list = NULL;
+                return;
+            }
+            new_chain = new_chain->chain_list;
+        }
+    }
 }
 
 void free_chain_lists(ChainList **ptr_chain_list, int *list_number) {
@@ -283,8 +295,8 @@ int main(void) {
 
     process_instructions(&list_number, &instructions_number, &chain_list);
 
-    printf("\nHASHTABLE:\n");
-    print_hashtable(&chain_list, &list_number);
+    // printf("\nHASHTABLE:\n");
+    // print_hashtable(&chain_list, &list_number);
     free_chain_lists(&chain_list, &list_number);
     free(chain_list);
 
