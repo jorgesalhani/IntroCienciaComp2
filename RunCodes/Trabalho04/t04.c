@@ -47,7 +47,7 @@ char *read_input_word(void) {
     return instruction;
 }
 
-long int calculate_power(int base, int exponent, int result) {
+unsigned long int calculate_power(int base, int exponent, int result) {
     if (exponent == 0) return result;
     result = result * base;
     exponent--;
@@ -56,20 +56,19 @@ long int calculate_power(int base, int exponent, int result) {
 
 int calculate_hash_position(char *word, int *list_number) {
     int word_length = strlen(word);
-    long int hash_sum = 0;
-    int hash_sum_i = 0;
+    unsigned long int hash_sum = 0;
+    unsigned long int hash_sum_i = 0;
     int ascii_code = 0;
-    long int x_pow_i = 0;
+    unsigned long int x_pow_i = 0;
 
     for (int i = 0; i < word_length; i++) {
         ascii_code = (int)word[i];
         x_pow_i = calculate_power(X, i, 1);
 
-        hash_sum_i = (ascii_code * x_pow_i)%P;
-        hash_sum = hash_sum + hash_sum_i;
+        hash_sum_i = (ascii_code * x_pow_i);
+        hash_sum = (hash_sum + hash_sum_i)%P;
     }
-
-    hash_sum = hash_sum%(*list_number);
+    hash_sum = (int)hash_sum%(*list_number);
 
     return hash_sum;
 }
@@ -133,7 +132,6 @@ void add_word_to_header(ChainList **ptr_chain_list, char *word, int *word_positi
 void execute_add(char *word, ChainList **ptr_chain_list, int *list_number) {
     ChainList *chain_list = *ptr_chain_list;
     int word_position = calculate_hash_position(word, list_number);
-    // printf(" %s at: Table[%d]\n", word, word_position);
     bool is_position_available = check_position_availability(ptr_chain_list, &word_position);
     if (is_position_available) {
         add_word_to_header(ptr_chain_list, word, &word_position);
@@ -158,7 +156,7 @@ void execute_get(int *query_position, ChainList **ptr_chain_list) {
     new_chain = chain_list[*query_position].chain_list;
     // fflush(stdout);
     while (new_chain != NULL) {
-        printf(" %s", (*new_chain).word);
+        printf("%s", (*new_chain).word);
         new_chain = new_chain->chain_list;
     }
     printf("\n");
@@ -168,7 +166,7 @@ void execute_check(char *word, ChainList **ptr_chain_list, int *list_number) {
     int word_position = calculate_hash_position(word, list_number);
     bool word_exists = check_word_existence(ptr_chain_list, &word_position, word);
     if (word_exists) printf("sim\n");
-    else printf("nao\n");
+    else printf("não\n");
 }
 
 void execute_del(char *word, ChainList **ptr_chain_list, int* list_number) {
@@ -277,8 +275,6 @@ ChainList *build_main_chain_list(int *list_number) {
 }
 
 int main(void) {
-    setvbuf(stdout, NULL, _IONBF, 0);
-
     int list_number, instructions_number;
     read_list_and_instructions_number(&list_number, &instructions_number);
 
@@ -287,8 +283,8 @@ int main(void) {
 
     process_instructions(&list_number, &instructions_number, &chain_list);
 
-    // printf("\nHASHTABLE:\n");
-    // print_hashtable(&chain_list, &list_number);
+    printf("\nHASHTABLE:\n");
+    print_hashtable(&chain_list, &list_number);
     free_chain_lists(&chain_list, &list_number);
     free(chain_list);
 
